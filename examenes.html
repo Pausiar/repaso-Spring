@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Exàmens – Spring Boot Repàs</title>
+<style>
+:root{--green:#6db33f;--dark:#1a1a2e;--card:#16213e;--accent:#0f3460;--text:#e0e0e0;--muted:#a0a0b0;--red:#e74c3c;--yellow:#f39c12;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;}
+nav{background:var(--accent);padding:0 2rem;display:flex;align-items:center;gap:1rem;height:56px;box-shadow:0 2px 10px rgba(0,0,0,.4);}
+nav .logo{font-size:1.2rem;font-weight:700;color:var(--green);text-decoration:none;margin-right:auto;}
+nav a{color:var(--text);text-decoration:none;font-size:.9rem;padding:.3rem .7rem;border-radius:6px;transition:background .2s;}
+nav a:hover,nav a.active{background:rgba(109,179,63,.25);color:var(--green);}
+
+/* ── SCREENS ── */
+.screen{display:none;max-width:860px;margin:0 auto;padding:2rem 1rem;}
+.screen.active{display:block;}
+
+/* ── SELECT EXAM ── */
+h1{font-size:2rem;color:var(--green);text-align:center;margin-bottom:.5rem;}
+.subtitle{text-align:center;color:var(--muted);margin-bottom:2rem;}
+.exam-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1rem;margin-bottom:2.5rem;}
+.exam-btn{background:var(--card);border:1px solid #2a2a4a;border-radius:12px;padding:1.5rem 1rem;text-align:center;cursor:pointer;transition:transform .2s,border-color .2s;color:var(--text);}
+.exam-btn:hover{transform:translateY(-4px);border-color:var(--green);}
+.exam-btn .num{font-size:2.2rem;margin-bottom:.4rem;}
+.exam-btn h3{font-size:1rem;color:var(--green);}
+.exam-btn p{font-size:.78rem;color:var(--muted);margin-top:.3rem;}
+
+/* ── SELECT MODE ── */
+.mode-cards{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;margin-top:1.5rem;}
+.mode-card{background:var(--card);border:2px solid #2a2a4a;border-radius:14px;padding:2rem 1.5rem;width:260px;text-align:center;cursor:pointer;transition:border-color .2s,transform .2s;}
+.mode-card:hover{border-color:var(--green);transform:translateY(-4px);}
+.mode-card .icon{font-size:3rem;margin-bottom:.8rem;}
+.mode-card h2{color:var(--green);margin-bottom:.5rem;}
+.mode-card p{font-size:.85rem;color:var(--muted);line-height:1.5;}
+.back-btn{display:inline-flex;align-items:center;gap:.4rem;background:none;border:1px solid #2a2a4a;color:var(--muted);padding:.4rem .9rem;border-radius:8px;cursor:pointer;font-size:.85rem;margin-bottom:1.5rem;transition:border-color .2s,color .2s;}
+.back-btn:hover{border-color:var(--green);color:var(--green);}
+
+/* ── QUIZ ── */
+.quiz-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem;flex-wrap:wrap;}
+.quiz-title{font-size:1rem;color:var(--green);font-weight:700;}
+.quiz-info{margin-left:auto;font-size:.85rem;color:var(--muted);}
+.mode-badge{font-size:.72rem;padding:.2rem .6rem;border-radius:20px;font-weight:700;}
+.mode-badge.survival{background:rgba(231,76,60,.15);color:var(--red);border:1px solid var(--red);}
+.mode-badge.practice{background:rgba(243,156,18,.15);color:var(--yellow);border:1px solid var(--yellow);}
+.progress-bar{width:100%;height:6px;background:#2a2a4a;border-radius:3px;margin-bottom:1.8rem;overflow:hidden;}
+.progress-fill{height:100%;background:var(--green);transition:width .4s;}
+.question-card{background:var(--card);border:1px solid #2a2a4a;border-radius:14px;padding:2rem;}
+.question-num{font-size:.78rem;color:var(--muted);margin-bottom:.6rem;}
+.question-text{font-size:1.1rem;line-height:1.6;margin-bottom:1.5rem;}
+.options{display:flex;flex-direction:column;gap:.7rem;}
+.opt{background:#1e2845;border:1px solid #2a2a4a;border-radius:10px;padding:.9rem 1.2rem;cursor:pointer;font-size:.95rem;transition:background .15s,border-color .15s;text-align:left;}
+.opt:hover:not(.disabled){background:#253055;border-color:var(--green);}
+.opt.correct{background:rgba(109,179,63,.2);border-color:var(--green);color:var(--green);}
+.opt.wrong{background:rgba(231,76,60,.2);border-color:var(--red);color:var(--red);}
+.opt.disabled{cursor:default;}
+.feedback{margin-top:1rem;padding:.8rem 1rem;border-radius:8px;font-size:.9rem;display:none;}
+.feedback.show{display:block;}
+.feedback.ok{background:rgba(109,179,63,.1);border:1px solid var(--green);color:var(--green);}
+.feedback.ko{background:rgba(231,76,60,.1);border:1px solid var(--red);color:var(--red);}
+.next-btn{margin-top:1.2rem;padding:.7rem 1.8rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:1rem;cursor:pointer;font-weight:700;display:none;}
+.next-btn.show{display:inline-block;}
+.lives{display:flex;gap:.3rem;font-size:1.1rem;}
+
+/* ── RESULTS ── */
+.result-box{background:var(--card);border-radius:14px;padding:2.5rem;text-align:center;}
+.result-box .big-num{font-size:4rem;font-weight:700;color:var(--green);}
+.result-box .result-label{font-size:1.2rem;color:var(--muted);margin-bottom:1.5rem;}
+.result-bars{display:flex;justify-content:center;gap:2rem;margin:1.5rem 0;flex-wrap:wrap;}
+.stat{text-align:center;}
+.stat .val{font-size:1.8rem;font-weight:700;}
+.stat .lbl{font-size:.78rem;color:var(--muted);}
+.stat.g .val{color:var(--green);}
+.stat.r .val{color:var(--red);}
+.restart-btn{margin-top:1.5rem;padding:.7rem 1.8rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:1rem;cursor:pointer;font-weight:700;}
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="index.html">🍃 Spring Boot Repàs</a>
+  <a href="index.html">🏠 Inici</a>
+  <a href="examenes.html" class="active">📝 Exàmens</a>
+  <a href="teoria.html">📚 Teoria</a>
+  <a href="ejercicios.html">💻 Exercicis</a>
+</nav>
+
+<!-- SCREEN 1: SELECT EXAM -->
+<div class="screen active" id="s-select">
+  <h1>📝 Exàmens Tipus Test</h1>
+  <p class="subtitle">Selecciona un examen de 50 preguntes i tria el teu mode de joc.</p>
+  <div class="exam-grid">
+    <div class="exam-btn" onclick="selectExam(0)">
+      <div class="num">1️⃣</div>
+      <h3>Examen 1</h3>
+      <p>Intro · Estructura · IoC / DI</p>
+    </div>
+    <div class="exam-btn" onclick="selectExam(1)">
+      <div class="num">2️⃣</div>
+      <h3>Examen 2</h3>
+      <p>MVC · JPA · Entitats</p>
+    </div>
+    <div class="exam-btn" onclick="selectExam(2)">
+      <div class="num">3️⃣</div>
+      <h3>Examen 3</h3>
+      <p>Repositoris · Serveis · Controladors</p>
+    </div>
+    <div class="exam-btn" onclick="selectExam(3)">
+      <div class="num">4️⃣</div>
+      <h3>Examen 4</h3>
+      <p>DTO · Builder · Security · Excepcions · Upload</p>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: SELECT MODE -->
+<div class="screen" id="s-mode">
+  <button class="back-btn" onclick="goScreen('s-select')">← Tornar</button>
+  <h1 id="mode-title">Tria el mode</h1>
+  <p class="subtitle">Cada mode té un comportament diferent quan falles.</p>
+  <div class="mode-cards">
+    <div class="mode-card" onclick="startQuiz('survival')">
+      <div class="icon">💀</div>
+      <h2>Mode Supervivència</h2>
+      <p>Si falles una resposta, l'examen <strong>torna a zero</strong> des del principi. Necessites respondre totes 50 correctament d'una tirada.</p>
+    </div>
+    <div class="mode-card" onclick="startQuiz('practice')">
+      <div class="icon">📖</div>
+      <h2>Mode Pràctica</h2>
+      <p>Si falles, et mostra la resposta correcta i <strong>continues</strong> amb la pregunta següent. Ideal per aprendre.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: QUIZ -->
+<div class="screen" id="s-quiz">
+  <div class="quiz-header">
+    <button class="back-btn" onclick="goScreen('s-mode')" style="margin:0">← Sortir</button>
+    <span class="quiz-title" id="quiz-title">Examen 1</span>
+    <span class="mode-badge" id="mode-badge">Supervivència</span>
+    <span class="quiz-info" id="quiz-info">Pregunta 1/50</span>
+    <div class="lives" id="lives-display"></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="question-card">
+    <div class="question-num" id="q-num">Pregunta 1 de 50</div>
+    <div class="question-text" id="q-text"></div>
+    <div class="options" id="q-opts"></div>
+    <div class="feedback" id="q-feedback"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Següent →</button>
+  </div>
+</div>
+
+<!-- SCREEN 4: RESULTS -->
+<div class="screen" id="s-result">
+  <div class="result-box">
+    <div class="big-num" id="res-pct">0%</div>
+    <div class="result-label" id="res-label">Resultat</div>
+    <div class="result-bars">
+      <div class="stat g"><div class="val" id="res-ok">0</div><div class="lbl">Correctes ✅</div></div>
+      <div class="stat r"><div class="val" id="res-ko">0</div><div class="lbl">Errades ❌</div></div>
+      <div class="stat"><div class="val" id="res-tot" style="color:var(--text)">0</div><div class="lbl">Total</div></div>
+    </div>
+    <button class="restart-btn" onclick="restartExam()">🔄 Repetir examen</button>
+    <button class="restart-btn" style="background:var(--accent);margin-left:.8rem;" onclick="goScreen('s-select')">📋 Triar examen</button>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   BANK DE PREGUNTES  – 4 exàmens × 50
+   format: {q, opts:[a,b,c,d], ans (0-indexed)}
+════════════════════════════════════════════ */
+const EXAMS = [
+/* ────── EXAMEN 1: Intro · Estructura · IoC/DI ────── */
+[
+{q:"Quin framework forma la base de Spring Boot?",opts:["Hibernate","Spring Framework","Maven","Tomcat"],ans:1},
+{q:"Quin servidor integrat utilitza Spring Boot per defecte?",opts:["Jetty","JBoss","Tomcat","GlassFish"],ans:2},
+{q:"Quina anotació és el punt d'entrada d'una aplicació Spring Boot?",opts:["@Controller","@SpringBootApplication","@SpringApplication","@BootApplication"],ans:1},
+{q:"Quina eina es fa servir per crear projectes Spring Boot personalitzats?",opts:["Spring IDE","Maven Central","Spring Initializr","Spring Console"],ans:2},
+{q:"Quin arxiu de configuració principal utilitza Spring Boot?",opts:["config.xml","pom.xml","application.properties","settings.gradle"],ans:2},
+{q:"Quin paràmetre de Spring Initializr identifica l'organització del projecte?",opts:["Name","Artifact","Group","Version"],ans:2},
+{q:"Quin paràmetre de Spring Initializr representa el nom del JAR generat?",opts:["Group","Artifact","Name","Package"],ans:1},
+{q:"Quina dependència cal per crear REST APIs amb Spring Boot?",opts:["spring-boot-starter-data","spring-boot-starter-web","spring-boot-starter-rest","spring-boot-starter-api"],ans:1},
+{q:"En quin port s'inicia per defecte Spring Boot?",opts:["3000","8081","80","8080"],ans:3},
+{q:"Quin concepte permet a Spring gestionar automàticament la creació d'objectes?",opts:["DI","AOP","IoC","MVC"],ans:2},
+{q:"Com s'anomenen els objectes gestionats pel contenidor IoC de Spring?",opts:["components","beans","modules","nodes"],ans:1},
+{q:"Quina anotació indica a Spring que ha d'injectar una dependència automàticament?",opts:["@Inject","@Component","@Autowired","@Resource"],ans:2},
+{q:"Quina anotació marca una classe com a component genèric de Spring?",opts:["@Service","@Bean","@Component","@Module"],ans:2},
+{q:"Quina anotació marca una classe com a repositori de dades?",opts:["@DAO","@Repository","@Database","@Persistence"],ans:1},
+{q:"Quina anotació marca una classe com a servei de lògica de negoci?",opts:["@BusinessLogic","@Manager","@Service","@Logic"],ans:2},
+{q:"Quin mètode inicia el contenidor IoC de Spring?",opts:["SpringBoot.start()","Application.boot()","SpringApplication.run()","Spring.init()"],ans:2},
+{q:"Quina anotació s'executa just ABANS de destruir un bean?",opts:["@PostDestroy","@BeforeDestroy","@PreDestroy","@OnDestroy"],ans:2},
+{q:"Quina anotació s'executa DESPRÉS d'inicialitzar un bean i injectar les dependències?",opts:["@PostConstruct","@AfterInit","@OnStart","@BeanReady"],ans:0},
+{q:"Quin problema té crear objectes manualment sense IoC?",opts:["Falta de rendiment","Acoblament fort (Coupling)","Menys memòria","No compila"],ans:1},
+{q:"Quina capa conté les classes d'entitat en un projecte Spring Boot?",opts:["controller","service","model","repository"],ans:2},
+{q:"Quin fitxer de Maven gestiona les dependències del projecte?",opts:["build.gradle","settings.xml","pom.xml","deps.xml"],ans:2},
+{q:"Quin format genera Spring Initializr per descarregar el projecte?",opts:["TAR","ZIP","JAR","WAR"],ans:1},
+{q:"Quin concepte permet detectar dependències i configurar-les automàticament a Spring Boot?",opts:["Auto-build","Auto-wiring","Auto-scan","Auto-configuration"],ans:3},
+{q:"Quin llenguatge és el més utilitzat en l'ecosistema Spring?",opts:["Groovy","Kotlin","Scala","Java"],ans:3},
+{q:"Quin mòdul de Spring s'utilitza per a la persistència de dades?",opts:["Spring Web","Spring Data","Spring ORM","Spring DB"],ans:1},
+{q:"Quin mòdul de Spring s'utilitza per a la seguretat?",opts:["Spring Auth","Spring Guard","Spring Security","Spring Access"],ans:2},
+{q:"Quin paradigma permet afegir funcionalitats com logging sense modificar el codi principal?",opts:["OOP","AOP","FP","IoC"],ans:1},
+{q:"Quina alternativa a Maven es coneix per la seva velocitat i flexibilitat?",opts:["Ant","Make","Gradle","Ivy"],ans:2},
+{q:"On s'ubiquen els arxius de configuració com application.properties?",opts:["src/main/java","src/main/resources","src/config","resources/config"],ans:1},
+{q:"Quin és el propòsit del fitxer schema.sql a Spring Boot?",opts:["Definir la ruta de l'API","Configurar el servidor","Crear les taules de la BD","Gestionar dependències"],ans:2},
+{q:"Quin és el propòsit del fitxer data.sql?",opts:["Crear lògica de negoci","Inserir dades inicials a la BD","Configurar Spring Security","Definir les rutes de l'API"],ans:1},
+{q:"Quin avantatge ofereix IoC respecte a la creació manual amb 'new'?",opts:["Codi més llarg","Menys anotacions","Menys acoblament i més testabilitat","Més velocitat de compilació"],ans:2},
+{q:"Quin concepte representa 'els que demanen els objectes però no els creen'?",opts:["Factory Pattern","IoC","Singleton","Proxy"],ans:1},
+{q:"Quin és l'objectiu principal de la Injecció de Dependències (DI)?",opts:["Crear bases de dades","Gestionar HTTP","Proporcionar dependències de manera externa","Compilar el projecte"],ans:2},
+{q:"En quina capa s'ubiquen els controladors en l'estructura de Spring Boot?",opts:["model","repository","service","controller"],ans:3},
+{q:"Quines anotacions escaneja el contenidor IoC durant l'arrencada?",opts:["@Bean, @Config","@Getter, @Setter","@Component, @Service, @Repository, @Controller","@Inject, @Provide"],ans:2},
+{q:"Quin és el resultat de compilar un projecte Spring Boot?",opts:["Un fitxer EXE","Un fitxer JAR o WAR","Un fitxer ZIP","Una carpeta bin"],ans:1},
+{q:"Quin mòdul de Spring permet la comunicació entre microserveis?",opts:["Spring Data","Spring MVC","Spring Cloud","Spring Boot"],ans:2},
+{q:"Quin framework implementa JPA per defecte a Spring Boot?",opts:["EclipseLink","OpenJPA","Hibernate","TopLink"],ans:2},
+{q:"Quina anotació combina @Controller i @ResponseBody?",opts:["@ApiController","@RestController","@JsonController","@DataController"],ans:1},
+{q:"Quin sistema de construcció utilitza un fitxer build.gradle?",opts:["Maven","Ant","Gradle","Make"],ans:2},
+{q:"Quin component de Spring Boot integra JPA per simplificar el treball amb bases de dades?",opts:["Spring ORM","Spring JDBC","Spring Data JPA","Spring Persistence"],ans:2},
+{q:"Per a quina necessitat és Spring Cloud?",opts:["Bases de dades","Seguretat","Aplicacions distribuïdes / microserveis","Interfícies gràfiques"],ans:2},
+{q:"Quin és el format del Group seguint el domini invers per 'miempresa.com'?",opts:["miempresa.com","com.miempresa","es.miempresa","www.miempresa"],ans:1},
+{q:"Quin és el propòsit de la capa Repository en l'arquitectura en capes?",opts:["Gestionar la UI","Contenir la lògica de negoci","Accedir a la base de dades","Gestionar peticions HTTP"],ans:2},
+{q:"Quin és el propòsit principal de la capa Service en Spring Boot?",opts:["Gestionar peticions HTTP","Encapsular la lògica de negoci","Accedir directament a la BD","Renderitzar vistes HTML"],ans:1},
+{q:"Quin és el propòsit del Contenidor IoC de Spring?",opts:["Servir pàgines web","Gestionar objectes (beans) i les seves dependències","Compilar el codi Java","Gestionar la seguretat"],ans:1},
+{q:"On es troba la classe principal d'arrencada d'un projecte Spring Boot?",opts:["src/main/resources","src/test/java","src/main/java, anotada amb @SpringBootApplication","src/config"],ans:2},
+{q:"Quines de les següents aplicacions es poden crear amb Spring Boot?",opts:["Només APIs REST","Únicament aplicacions web","APIs REST, apps web, microserveis i apps empresarials","Únicament microserveis"],ans:2},
+{q:"Quin és l'objectiu de la programació orientada a aspectes (AOP)?",opts:["Crear interfícies gràfiques","Modularitzar funcionalitats transversals com logs i transaccions","Gestionar bases de dades","Optimitzar el rendiment"],ans:1},
+{q:"Quina característica de Spring permet compartir un bean entre components sense crear-lo diverses vegades?",opts:["Prototype Scope","Singleton Scope (per defecte)","Request Scope","Session Scope"],ans:1}
+],
+/* ────── EXAMEN 2: MVC · JPA · Entitats ────── */
+[
+{q:"Quins són els tres components del patró MVC?",opts:["Module–View–Component","Model–View–Controller","Method–Variable–Class","Main–Value–Config"],ans:1},
+{q:"Quin component del MVC gestiona les dades i la lògica de negoci?",opts:["Vista","Controlador","Model","Router"],ans:2},
+{q:"Quin component del MVC mostra les dades a l'usuari?",opts:["Model","Controlador","Vista","Servei"],ans:2},
+{q:"Quin component del MVC actua d'intermediari entre Model i Vista?",opts:["Router","Dispatcher","Controlador","Middleware"],ans:2},
+{q:"Quin motor de plantilles utilitza Spring Boot per generar vistes HTML dinàmiques?",opts:["JSP","Freemarker","Thymeleaf","Mustache"],ans:2},
+{q:"Quin és el significat de JPA?",opts:["Java Persistence API","Java Programming Application","Jakarta Pattern Architecture","Java Project Annotations"],ans:0},
+{q:"Quina anotació JPA marca una classe com una entitat que representa una taula?",opts:["@Table","@Entity","@Model","@Persistence"],ans:1},
+{q:"Quina anotació JPA especifica la clau primària d'una entitat?",opts:["@PrimaryKey","@Key","@Id","@Identifier"],ans:2},
+{q:"Quina anotació JPA especifica el nom de la taula a la base de dades?",opts:["@Entity","@Table","@Schema","@Database"],ans:1},
+{q:"Quina estratègia de generació de clau primària utilitza l'autoincrement de la BD?",opts:["GenerationType.AUTO","GenerationType.SEQUENCE","GenerationType.TABLE","GenerationType.IDENTITY"],ans:3},
+{q:"Quina anotació JPA personalitza el nom d'una columna?",opts:["@Field","@Attribute","@Column","@Property"],ans:2},
+{q:"Quina anotació JPA marca un camp que NO ha de persistir a la base de dades?",opts:["@Skip","@Transient","@Ignore","@NotPersist"],ans:1},
+{q:"Quina relació JPA representa 'un autor té molts llibres'?",opts:["@ManyToMany","@OneToOne","@ManyToOne","@OneToMany"],ans:3},
+{q:"Quina relació JPA representa 'molts empleats pertanyen a un departament'?",opts:["@OneToMany","@ManyToOne","@OneToOne","@ManyToMany"],ans:1},
+{q:"Quina relació JPA representa 'un estudiant pot tenir moltes assignatures i viceversa'?",opts:["@OneToMany","@ManyToOne","@ManyToMany","@OneToOne"],ans:2},
+{q:"Quina anotació JPA s'utilitza per marcar la clau forana en una relació?",opts:["@ForeignKey","@JoinColumn","@Reference","@Relation"],ans:1},
+{q:"Quin paràmetre de @Column evita valors nuls?",opts:["required = true","notNull = true","nullable = false","null = false"],ans:2},
+{q:"Quina anotació JPA fa que un camp sigui únic a la taula?",opts:["@Unique","@Column(unique = true)","@Distinct","@NoRepeat"],ans:1},
+{q:"Quina és la implementació de JPA més utilitzada a Spring Boot?",opts:["EclipseLink","OpenJPA","Hibernate","TopLink"],ans:2},
+{q:"Quin és el propòsit de @GeneratedValue?",opts:["Crear valors aleatoris","Definir el tipus de dada","Indicar com es genera automàticament la clau primària","Validar dades"],ans:2},
+{q:"En el patró MVC de Spring Boot, quina capa accedeix directament a la base de dades?",opts:["Controller","Service","Repository","Model"],ans:2},
+{q:"Quin objectiu principal té el patró MVC?",opts:["Millorar el rendiment","Separació de responsabilitats","Reduir dependències","Automatitzar tests"],ans:1},
+{q:"Quin és el comportament per defecte de @Entity si no s'especifica @Table?",opts:["Genera un error","Utilitza el nom de la classe com a nom de taula","Crea una taula temporal","No crea cap taula"],ans:1},
+{q:"Quina anotació de JPA permet definir restriccions d'unicitat sobre múltiples columnes?",opts:["@UniqueIndex","@UniqueConstraint","@Constraint","@CompositeKey"],ans:1},
+{q:"Quin és el propòsit de Spring Data JPA?",opts:["Substituir Hibernate","Simplificar el treball amb JPA dins de Spring","Gestionar la seguretat de les dades","Generar interfícies gràfiques"],ans:1},
+{q:"Quina anotació JPA connecta dos entitats a través d'una taula intermèdia?",opts:["@JoinTable","@MappedBy","@Bridge","@Pivot"],ans:0},
+{q:"En una relació @ManyToMany, quin paràmetre evita la duplicació de la relació a l'altra entitat?",opts:["cascade","fetch","mappedBy","optional"],ans:2},
+{q:"Quina estratègia de càrrega carrega les dades relacionades IMMEDIATAMENT?",opts:["LAZY","EAGER","IMMEDIATE","DIRECT"],ans:1},
+{q:"Quina estratègia de càrrega RETARDA la càrrega de dades relacionades fins que es necessiten?",opts:["EAGER","DEFERRED","LAZY","OPTIONAL"],ans:2},
+{q:"Quin és el propòsit del FetchType en les relacions JPA?",opts:["Definir el tipus de relació","Controlar quan es carreguen les dades relacionades","Gestionar la clau forana","Definir restriccions"],ans:1},
+{q:"Quina és la funció de Hibernate en el context de Spring Boot?",opts:["Gestionar la seguretat","Implementar JPA i mapejar objectes a bases de dades","Gestionar peticions HTTP","Crear interfícies d'usuari"],ans:1},
+{q:"Quin tipus de resposta genera @RestController per defecte?",opts:["HTML","XML","JSON","Text pla"],ans:2},
+{q:"Com funciona el mapatge bidireccional de JPA?",opts:["Permet llegir i escriure alhora","Converteix objectes a BD i BD a objectes","Funciona en dos fils d'execució","Suporta dos bases de dades"],ans:1},
+{q:"Quina de les següents NO és una relació vàlida de JPA?",opts:["@OneToMany","@ManyToMany","@OneToOne","@ThreeToOne"],ans:3},
+{q:"Quin paràmetre de @Column defineix la longitud màxima d'un String?",opts:["size","max","length","maxLength"],ans:2},
+{q:"Quina és la capa de presentació (frontend) en el patró MVC de Spring Boot?",opts:["Service","Repository","Controller i View","Model"],ans:2},
+{q:"Quina anotació s'usa per a un camp que és clau primària i s'autogenera en JPA?",opts:["@Id i @Column","@Id i @GeneratedValue","@PrimaryKey i @Auto","@Key i @Generate"],ans:1},
+{q:"On es guarden per defecte les plantilles Thymeleaf?",opts:["src/templates","src/main/templates","src/main/resources/templates","src/views"],ans:2},
+{q:"Quina diferència hi ha entre @Controller i @RestController?",opts:["@RestController és per a HTML","@Controller retorna vistes HTML, @RestController retorna JSON","No hi ha diferència","@RestController és per a APIs internes"],ans:1},
+{q:"Quin element MVC s'encarrega de rebre les peticions HTTP del client?",opts:["Model","Vista","Controlador","Repositori"],ans:2},
+{q:"Quin objectiu té l'arquitectura en capes de Spring Boot?",opts:["Reduir el nombre de classes","Organitzar millor el codi i separar responsabilitats","Eliminar la necessitat de tests","Millorar la velocitat de la BD"],ans:1},
+{q:"Quina característica del MVC facilita la reutilització de la lògica de negoci?",opts:["La injecció de dependències","La separació entre Model, Vista i Controlador","El servidor integrat","La configuració automàtica"],ans:1},
+{q:"Quin és el resultat de JPA quan es defineix una classe com @Entity?",opts:["Es crea una interfície","Spring la mapeja a una taula de la BD","S'activa Spring Security","Es genera un controlador"],ans:1},
+{q:"En JPA, quin paràmetre de @Column defineix la columna com a no nul·la?",opts:["required = true","mandatory = true","nullable = false","notNull = true"],ans:2},
+{q:"Quina anotació a Spring MVC permet passar dades del controlador a la vista Thymeleaf?",opts:["@ViewData","@Attribute","Model (com a paràmetre)","@Template"],ans:2},
+{q:"Quin és l'objectiu de separació de responsabilitats (SoC) al MVC?",opts:["Reducció de classes","Que cada component tingui un paper clar i independent","Eliminar la BD","Millorar el rendiment"],ans:1},
+{q:"Quina estratègia GenerationType NO existeix a JPA?",opts:["IDENTITY","SEQUENCE","TABLE","AUTO_INCREMENT_DB"],ans:3},
+{q:"Quin mòdul de Spring facilita operacions paginades sobre la BD?",opts:["JpaRepository","CrudRepository","PagingAndSortingRepository","SimpleJpaRepository"],ans:2},
+{q:"Quina implementació és Spring Data JPA?",opts:["Una base de dades","Un servidor web","Una capa d'abstracció sobre JPA/Hibernate","Una eina de testing"],ans:2},
+{q:"Quin és el propòsit de la capa Vista (View) en el patró MVC?",opts:["Executar la lògica de negoci","Gestionar les peticions HTTP","Presentar les dades a l'usuari","Accedir a la base de dades"],ans:2},
+{q:"Quina anotació JPA sobre l'atribut garanteix que el valor és únic a la taula?",opts:["@UniqueValue","@Column(unique=true)","@NotRepeated","@Distinct"],ans:1}
+],
+/* ────── EXAMEN 3: Repositoris · Serveis · Controladors ────── */
+[
+{q:"Quina interfície s'usa majoritàriament per crear repositoris a Spring Boot?",opts:["CrudRepository","PagingAndSortingRepository","JpaRepository","DataRepository"],ans:2},
+{q:"Quin és el tipus de retorn de findById() en Spring Data JPA?",opts:["T","List<T>","Optional<T>","Collection<T>"],ans:2},
+{q:"Quin mètode del repositori guarda o actualitza una entitat?",opts:["persist()","update()","insert()","save()"],ans:3},
+{q:"Quin mètode del repositori retorna TOTES les entitats?",opts:["getAll()","findAll()","listAll()","fetchAll()"],ans:1},
+{q:"Quin mètode del repositori elimina una entitat per clau primària?",opts:["remove()","erase()","deleteById()","drop()"],ans:2},
+{q:"Quin prefix s'usa a les convencions de noms de Spring Data per cercar per propietat?",opts:["getBy","searchBy","findBy","lookupBy"],ans:2},
+{q:"Quin SQL genera el mètode findByNom(String nom)?",opts:["SELECT * FROM entitat","SELECT * FROM entitat WHERE nom = ?","SELECT nom FROM entitat","SELECT * FROM entitat ORDER BY nom"],ans:1},
+{q:"Quina paraula clau a les convencions de noms indica 'major que'?",opts:["BiggerThan","MoreThan","Above","GreaterThan"],ans:3},
+{q:"Quin prefix de convenció de noms de Spring Data compta entitats?",opts:["sizeBy","countBy","totalBy","numberBy"],ans:1},
+{q:"Quina anotació s'usa per a consultes JPQL personalitzades en un repositori?",opts:["@SQL","@HQL","@Query","@JPQL"],ans:2},
+{q:"Quin paràmetre de JpaRepository<Entitat, Long> indica el tipus de l'entitat?",opts:["Segon paràmetre","Primer paràmetre","Camp de tipus","Anotació @Entity"],ans:1},
+{q:"Quina anotació marca una classe com a servei de Spring Boot?",opts:["@Component","@Manager","@Service","@Logic"],ans:2},
+{q:"Quin és el propòsit principal dels serveis en Spring Boot?",opts:["Gestionar peticions HTTP","Encapsular la lògica de negoci","Accedir directament a la BD","Renderitzar vistes"],ans:1},
+{q:"Quina anotació injecta el repositori en un servei?",opts:["@Inject","@Resource","@Autowired","@Link"],ans:2},
+{q:"Quina anotació s'executa quan el servei s'inicialitza (bean creat i dependències injectades)?",opts:["@PreConstruct","@OnStart","@Init","@PostConstruct"],ans:3},
+{q:"Quina anotació s'executa just ABANS de destruir el bean del servei?",opts:["@OnDestroy","@PreDestroy","@AfterClose","@Cleanup"],ans:1},
+{q:"En quina capa s'ha d'implementar la lògica de negoci?",opts:["Controller","Repository","Model","Service"],ans:3},
+{q:"Quin mètode del controlador gestiona peticions GET?",opts:["@PostMapping","@GetMapping","@RequestGet","@HttpGet"],ans:1},
+{q:"Quin mètode del controlador gestiona peticions POST?",opts:["@GetMapping","@PutMapping","@PostMapping","@CreateMapping"],ans:2},
+{q:"Quin mètode del controlador gestiona peticions PUT?",opts:["@UpdateMapping","@PutMapping","@EditMapping","@ModifyMapping"],ans:1},
+{q:"Quin mètode del controlador gestiona peticions DELETE?",opts:["@RemoveMapping","@EraseMapping","@DeleteMapping","@DropMapping"],ans:2},
+{q:"Quina anotació defineix la ruta base d'un controlador?",opts:["@BaseMapping","@ControllerPath","@RootMapping","@RequestMapping"],ans:3},
+{q:"Quina anotació captura un paràmetre de la URL com /cities?country=Spain?",opts:["@PathVariable","@UrlParam","@RequestParam","@QueryParam"],ans:2},
+{q:"Quina anotació captura un segment dinàmic de la URL com /cities/{id}?",opts:["@RequestParam","@PathVariable","@UrlSegment","@DynamicParam"],ans:1},
+{q:"Quina anotació captura el cos (body) d'una petició POST en JSON?",opts:["@RequestBody","@Body","@JsonBody","@PostBody"],ans:0},
+{q:"Quina classe s'utilitza per retornar una resposta HTTP amb codi d'estat personalitzat?",opts:["HttpResponse","ApiResponse","ResponseEntity","StatusResponse"],ans:2},
+{q:"Quin codi HTTP indica que un recurs s'ha creat correctament?",opts:["200 OK","204 No Content","201 Created","202 Accepted"],ans:2},
+{q:"Quin codi HTTP indica que la petició és correcta i hi ha resposta?",opts:["201","200 OK","204","202"],ans:1},
+{q:"Quin codi HTTP indica que no s'ha trobat el recurs?",opts:["400","500","403","404 Not Found"],ans:3},
+{q:"Quin codi HTTP indica un error intern del servidor?",opts:["404","403","401","500"],ans:3},
+{q:"Quina paraula clau a les convencions de noms permet buscar per dues propietats?",opts:["Plus","With","And","Or"],ans:2},
+{q:"Quin prefix de convenció de noms comprova si existeixen entitats?",opts:["hasBy","checkBy","existsBy","verifyBy"],ans:2},
+{q:"Quin prefix de convenció de noms elimina entitats?",opts:["removeBy","eraseBy","dropBy","deleteBy"],ans:3},
+{q:"Quina relació té el servei amb el repositori?",opts:["El servei hereta del repositori","El servei utilitza el repositori per accedir a les dades","El repositori crida el servei","No hi ha relació directa"],ans:1},
+{q:"Quin és el paràmetre de JpaRepository<Entitat, Long> que indica el tipus de la clau primària?",opts:["Primer paràmetre","Segon paràmetre","Tercer paràmetre","Es defineix amb @Id"],ans:1},
+{q:"Quin és el propòsit de ResponseEntity a Spring Boot?",opts:["Serialitzar dades a JSON","Controlar el codi HTTP i el cos de la resposta","Gestionar excepcions","Injectar dependències"],ans:1},
+{q:"Quina és la sintaxi correcta per definir una ruta amb variable a un controlador?",opts:["@GetMapping(\"/elem-<id>\")","@GetMapping(\"/elem/{id}\")","@GetMapping(\"/elem?id\")","@GetMapping(\"/elem[id]\")"],ans:1},
+{q:"Quin mètode del JpaRepository realitza un flush (commit) de JPA?",opts:["commit()","persist()","flush()","sync()"],ans:2},
+{q:"Quin és l'avantatge de l'arquitectura Controller–Service–Repository?",opts:["Menys classes","Millor separació de responsabilitats i mantenibilitat","Accés directe a la BD des del controlador","Menys anotacions"],ans:1},
+{q:"Quina anotació s'usa per a una consulta SQL nativa en un repositori?",opts:["@Query(nativeQuery = false)","@SQL","@NativeQuery","@Query(nativeQuery = true)"],ans:3},
+{q:"Quin és el propòsit de @PathVariable?",opts:["Capturar paràmetres de formulari","Capturar el cos de la petició","Capturar segments dinàmics de la URL","Definir la ruta base"],ans:2},
+{q:"Diferència entre @RequestParam i @PathVariable?",opts:["@RequestParam és per a GET, @PathVariable per a POST","@RequestParam captura ?key=val, @PathVariable captura /val","No hi ha diferència","@PathVariable és obsolet"],ans:1},
+{q:"Quin mètode de JpaRepository comprova si existeix una entitat per id?",opts:["hasId()","existsById()","contains()","checkId()"],ans:1},
+{q:"Quin és el propòsit de count() en JpaRepository?",opts:["Esborrar registres","Retornar el nombre total d'entitats","Cercar per nom","Actualitzar entitats"],ans:1},
+{q:"Quina anotació a un controlador defineix que tots els mètodes retornen JSON?",opts:["@Controller","@RestController","@JsonController","@ApiController"],ans:1},
+{q:"Quina és la capa intermediària entre el controlador i el repositori?",opts:["Model","DTO","Service","Entity"],ans:2},
+{q:"Quin tipus retorna findAll() de JpaRepository?",opts:["Set<T>","Collection<T>","Optional<T>","List<T>"],ans:3},
+{q:"Quin és el propòsit de l'Optional<T> retornat per findById()?",opts:["Millorar el rendiment","Evitar NullPointerException quan no es troba l'entitat","Retornar múltiples resultats","Ordenar resultats"],ans:1},
+{q:"Quin mètode de Spring Data genera SELECT … WHERE camp LIKE %valor%?",opts:["findByCampContains","findByCampLike","findByCampContaining","findByCampMatches"],ans:2},
+{q:"En quina capa es recomana usar @Transactional per gestionar transaccions?",opts:["Controller","Repository","Service","Model"],ans:2},
+{q:"Quina és la jerarquia correcta de crides en l'arquitectura de Spring Boot?",opts:["Repository → Service → Controller","Controller → Repository → Service","Controller → Service → Repository","Service → Controller → Repository"],ans:2}
+],
+/* ────── EXAMEN 4: DTO · Builder · Security · Excepcions · Upload ────── */
+[
+{q:"Quin és el propòsit principal del patró DTO (Data Transfer Object)?",opts:["Accedir a la BD","Transferir dades entre capes evitant exposar l'entitat directament","Gestionar la seguretat","Crear beans de Spring"],ans:1},
+{q:"Quin patró permet construir objectes complexos pas a pas?",opts:["Factory","Singleton","Builder","Observer"],ans:2},
+{q:"Quants components principals té el patró Builder?",opts:["2","3","4","5"],ans:2},
+{q:"Quin component del Builder implementa la interfície i construeix l'objecte?",opts:["Director","Product","Builder interface","Concrete Builder"],ans:3},
+{q:"Quin component del Builder coordina el procés de construcció?",opts:["Concrete Builder","Director","Product","Client"],ans:1},
+{q:"Quina anotació de Lombok genera automàticament el patró Builder en Java?",opts:["@Build","@Builder","@AutoBuild","@Construct"],ans:1},
+{q:"Quin és el principal avantatge del patró Builder amb molts atributs opcionals?",opts:["Menys codi a executar","Lectura i creació d'objectes més clara i flexible","Millor rendiment","Menys classes"],ans:1},
+{q:"Quin mòdul de Spring gestiona l'autenticació i l'autorització?",opts:["Spring Auth","Spring Guard","Spring Security","Spring Access"],ans:2},
+{q:"Quin tipus d'atac protegeix Spring Security relacionat amb formularis?",opts:["SQL Injection","XSS","CSRF (Cross-Site Request Forgery)","DDoS"],ans:2},
+{q:"Quina dependència cal afegir a build.gradle per usar Spring Security?",opts:["spring-boot-starter-auth","spring-boot-starter-security","spring-security-core","spring-boot-security"],ans:1},
+{q:"Quin usuari per defecte genera Spring Security si no se'n configura cap?",opts:["admin","root","user","spring"],ans:2},
+{q:"On apareix la contrasenya generada automàticament per Spring Security?",opts:["En application.properties","En un fitxer de log","A la consola en iniciar l'aplicació","En el navegador"],ans:2},
+{q:"Quin fitxer es modifica per definir usuaris personalitzats amb Spring Security bàsic?",opts:["security.xml","users.properties","application.properties","config.yaml"],ans:2},
+{q:"Quines dues taules crea Spring Security amb JDBC Authentication?",opts:["login i roles","users i authorities","accounts i permissions","credentials i access"],ans:1},
+{q:"Quina anotació s'utilitza per gestionar excepcions dins d'un controlador específic?",opts:["@HandleException","@ErrorHandler","@ExceptionHandler","@CatchException"],ans:2},
+{q:"Quina anotació defineix un component que gestiona excepcions de manera global per tots els controladors REST?",opts:["@GlobalHandler","@ControllerAdvice","@RestControllerAdvice","@ExceptionAdvice"],ans:2},
+{q:"Diferència entre @ControllerAdvice i @RestControllerAdvice?",opts:["@ControllerAdvice gestiona REST","@ControllerAdvice per MVC (vistes), @RestControllerAdvice per REST (JSON)","No hi ha diferència","@RestControllerAdvice és obsolet"],ans:1},
+{q:"Quina classe permet retornar un codi HTTP personalitzat amb body?",opts:["HttpMessage","ResponseEntity","ApiResult","StatusBody"],ans:1},
+{q:"Quin codi HTTP s'utilitza per 'recurs no trobat'?",opts:["500","403","401","404"],ans:3},
+{q:"Quin és el propòsit de @ResponseStatus a un mètode de gestió d'excepcions?",opts:["Definir el format de resposta","Indicar el codi HTTP que retorna aquell mètode","Autenticar l'usuari","Definir la ruta"],ans:1},
+{q:"Quines propietats d'application.properties controlen el tamany màxim de fitxers pujats?",opts:["max.file.size i max.request.size","spring.servlet.multipart.max-file-size i max-request-size","upload.max i request.max","file.limit i request.limit"],ans:1},
+{q:"Quina interfície Spring s'utilitza per capturar els fitxers d'un formulari HTML de pujada?",opts:["@FileParam","@UploadFile","MultipartFile","@RequestFile"],ans:2},
+{q:"En quin format retorna les dades @RestControllerAdvice per defecte?",opts:["HTML","XML","JSON","Text pla"],ans:2},
+{q:"Quin és el propòsit d'un DTO en relació amb les entitats JPA?",opts:["Substituir les entitats completament","Exposar dades seleccionades sense revelar l'entitat interna","Crear la taula a la BD","Gestionar la sessió HTTP"],ans:1},
+{q:"Quina classe de Spring s'utilitza per retornar un fitxer com a recurs HTTP?",opts:["FileResource","FileResponse","Resource","ByteStream"],ans:2},
+{q:"Quin controlador s'encarrega de mostrar la VISTA HTML de pujada de fitxers?",opts:["REST Controller","MVC Controller","Security Controller","File Controller"],ans:1},
+{q:"Quin controlador s'encarrega de RETORNAR EL FITXER com a recurs HTTP?",opts:["MVC Controller","HTML Controller","REST Controller","View Controller"],ans:2},
+{q:"Quina propietat de Spring Security configura el nom d'usuari per defecte?",opts:["spring.security.user.login","spring.security.user.name","spring.security.username","spring.user.name"],ans:1},
+{q:"Quin element de Spring Security gestiona els rols i permisos?",opts:["users","credentials","authorities","roles"],ans:2},
+{q:"Quin és el principal desavantatge d'exposar directament les entitats JPA des del controlador?",opts:["Rendiment pitjor","Exposar dades internes i acoblament fort","No compila","Problemes amb Thymeleaf"],ans:1},
+{q:"Quina anotació de validació garanteix que un String no sigui null ni buit (ni espais)?",opts:["@NotNull","@NotEmpty","@NotBlank","@Required"],ans:2},
+{q:"Quina dependència permet usar anotacions de validació com @NotBlank, @Size?",opts:["spring-boot-starter-web","spring-boot-starter-validation","spring-boot-starter-data","spring-boot-starter-security"],ans:1},
+{q:"En la pujada de fitxers, on es guarден físicament els fitxers pujats?",opts:["A la base de dades","A la memòria RAM","En una carpeta del sistema de fitxers","Al navegador"],ans:2},
+{q:"Quin endpoint GET gestiona la llista de fitxers pujats i mostra la vista?",opts:["POST /upload","GET /upload","DELETE /upload","PUT /upload"],ans:1},
+{q:"Quin endpoint gestiona la pujada d'un nou fitxer?",opts:["GET /upload","PUT /upload","POST /upload","PATCH /upload"],ans:2},
+{q:"Quin concepte del patró Builder permet crear objectes amb paràmetres opcionals de manera llegible?",opts:["Setter chaining","Constructor sobrecàrregat","Mètodes encadenats del builder","Herència de classe"],ans:2},
+{q:"Quin és l'objectiu de la gestió global d'excepcions amb @RestControllerAdvice?",opts:["Gestionar errors de compilació","Centralitzar el tractament d'errors de l'API en un lloc únic","Crear logs automàtics","Autenticar usuaris"],ans:1},
+{q:"Quina anotació de Lombok genera getters, setters, toString, equals, hashCode?",opts:["@Accessors","@Data","@GettersSetters","@Properties"],ans:1},
+{q:"Quina és la carpeta estàndard per a pujada de fitxers als apunts del curs?",opts:["files/","static/uploads/","upload-dir","media/"],ans:2},
+{q:"Quin és el propòsit de BCryptPasswordEncoder a Spring Security?",opts:["Gestionar permisos","Encriptar contrasenyes de manera segura","Crear tokens JWT","Gestionar sessions"],ans:1},
+{q:"Quina anotació de Spring s'usa per configurar la seguretat amb Java Config?",opts:["@SecurityConfig","@EnableWebSecurity","@SpringSecurity","@SecureApp"],ans:1},
+{q:"Quina és la diferència entre la gestió local i global d'excepcions a Spring?",opts:["La local és per a REST, la global per a MVC","La local s'aplica a un controlador, la global a tots","La global és menys eficient","No hi ha diferència funcional"],ans:1},
+{q:"Quina és la clau forana que relaciona les taules users i authorities de Spring Security?",opts:["user_id","username","user_key","auth_id"],ans:1},
+{q:"Quin controller gestiona /uploads/{filename} per SERVIR els fitxers?",opts:["MVC Controller","Security Controller","REST Controller","File Service"],ans:2},
+{q:"Quin és el component 'Product' en el patró Builder?",opts:["La interfície que coordina","La classe que implementa la construcció","L'objecte complex que es construeix","El client que demana l'objecte"],ans:2},
+{q:"Quin dels següents NO és un component del patró Builder?",opts:["Director","Concrete Builder","Repository","Product"],ans:2},
+{q:"Quina anotació personalitza el missatge d'error d'una validació?",opts:["message = \"...\"","text = \"...\"","error = \"...\"","info = \"...\""],ans:0},
+{q:"Quina és la necessitat de separar el controlador MVC i el REST a l'upload de fitxers?",opts:["El MVC és més ràpid","Cada un té responsabilitats distintes: MVC gestiona la vista, REST serveix el fitxer","Obligació de Spring Boot","Millora el rendiment"],ans:1},
+{q:"Quin mètode de ResponseEntity retorna un 200 OK amb cos?",opts:["ResponseEntity.success()","ResponseEntity.ok()","ResponseEntity.found()","ResponseEntity.accepted()"],ans:1},
+{q:"Quina és la URL per accedir a la pàgina de login generada automàticament per Spring Security?",opts:["http://localhost:8080/auth","http://localhost:8080/sign-in","http://localhost:8080/login","http://localhost:8080/security"],ans:2}
+]
+];
+
+const EXAM_NAMES = [
+  "Examen 1 – Intro · Estructura · IoC/DI",
+  "Examen 2 – MVC · JPA · Entitats",
+  "Examen 3 – Repositoris · Serveis · Controladors",
+  "Examen 4 – DTO · Builder · Security · Excepcions · Upload"
+];
+
+/* ── STATE ── */
+let currentExam = 0, currentMode = 'practice';
+let questions = [], idx = 0, correct = 0, wrong = 0;
+let answered = false;
+
+/* ── NAVIGATION ── */
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function selectExam(n){
+  currentExam = n;
+  document.getElementById('mode-title').textContent = EXAM_NAMES[n];
+  goScreen('s-mode');
+}
+function startQuiz(mode){
+  currentMode = mode;
+  questions = [...EXAMS[currentExam]].sort(()=>Math.random()-.5);
+  idx = 0; correct = 0; wrong = 0;
+  document.getElementById('quiz-title').textContent = EXAM_NAMES[currentExam];
+  const badge = document.getElementById('mode-badge');
+  badge.textContent = mode === 'survival' ? '💀 Supervivència' : '📖 Pràctica';
+  badge.className = 'mode-badge ' + mode;
+  goScreen('s-quiz');
+  renderQuestion();
+}
+
+/* ── RENDER ── */
+function renderQuestion(){
+  answered = false;
+  const q = questions[idx];
+  document.getElementById('q-num').textContent = `Pregunta ${idx+1} de ${questions.length}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-info').textContent = `${idx+1} / ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${(idx/questions.length)*100}%`;
+  document.getElementById('q-feedback').className='feedback';
+  document.getElementById('q-feedback').textContent='';
+  document.getElementById('next-btn').className='next-btn';
+
+  const opts = document.getElementById('q-opts');
+  opts.innerHTML='';
+  const labels=['A','B','C','D'];
+  q.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt';
+    btn.textContent=`${labels[i]}) ${o}`;
+    btn.onclick=()=>answer(i);
+    opts.appendChild(btn);
+  });
+
+  // lives display
+  const ld=document.getElementById('lives-display');
+  ld.innerHTML='';
+  if(currentMode==='survival'){
+    ld.innerHTML=`<span style="font-size:.8rem;color:var(--muted)">Sense errors!</span>`;
+  }
+}
+
+function answer(chosen){
+  if(answered) return;
+  answered=true;
+  const q=questions[idx];
+  const opts=document.querySelectorAll('.opt');
+  opts.forEach(o=>o.classList.add('disabled'));
+  const fb=document.getElementById('q-feedback');
+  const nextBtn=document.getElementById('next-btn');
+
+  if(chosen===q.ans){
+    correct++;
+    opts[chosen].classList.add('correct');
+    fb.className='feedback ok show';
+    fb.textContent='✅ Correcte!';
+    nextBtn.className='next-btn show';
+  } else {
+    wrong++;
+    opts[chosen].classList.add('wrong');
+    opts[q.ans].classList.add('correct');
+    fb.className='feedback ko show';
+    if(currentMode==='survival'){
+      fb.textContent=`❌ Incorrecte. La resposta correcta era: ${['A','B','C','D'][q.ans]}) ${q.opts[q.ans]}. REINICIANT...`;
+      nextBtn.className='next-btn show';
+      nextBtn.textContent='🔄 Tornar a començar';
+      nextBtn.onclick=()=>{ nextBtn.textContent='Següent →'; nextBtn.onclick=nextQuestion; startQuiz(currentMode); };
+    } else {
+      fb.textContent=`❌ Incorrecte. La resposta correcta era: ${['A','B','C','D'][q.ans]}) ${q.opts[q.ans]}`;
+      nextBtn.className='next-btn show';
+    }
+  }
+
+  document.getElementById('quiz-info').textContent=`✅ ${correct}  ❌ ${wrong}`;
+}
+
+function nextQuestion(){
+  idx++;
+  if(idx>=questions.length){
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResults(){
+  const pct=Math.round((correct/questions.length)*100);
+  document.getElementById('res-pct').textContent=pct+'%';
+  document.getElementById('res-ok').textContent=correct;
+  document.getElementById('res-ko').textContent=wrong;
+  document.getElementById('res-tot').textContent=questions.length;
+  let label='';
+  if(pct>=90) label='🏆 Excel·lent! Tens el tema dominat.';
+  else if(pct>=70) label='👍 Bé! Repassa els errors i ho tindrás.';
+  else if(pct>=50) label='😅 Acceptable. Cal repassar més.';
+  else label='📚 Cal estudiar més. No et rendeixis!';
+  document.getElementById('res-label').textContent=label;
+  goScreen('s-result');
+}
+
+function restartExam(){
+  startQuiz(currentMode);
+}
+</script>
+</body>
+</html>

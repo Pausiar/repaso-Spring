@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Exercicis – Spring Boot Repàs</title>
+<style>
+:root{--green:#6db33f;--dark:#1a1a2e;--card:#16213e;--accent:#0f3460;--text:#e0e0e0;--muted:#a0a0b0;--red:#e74c3c;--yellow:#f39c12;--code-bg:#0d1117;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;}
+nav{background:var(--accent);padding:0 2rem;display:flex;align-items:center;gap:1rem;height:56px;box-shadow:0 2px 10px rgba(0,0,0,.4);}
+nav .logo{font-size:1.2rem;font-weight:700;color:var(--green);text-decoration:none;margin-right:auto;}
+nav a{color:var(--text);text-decoration:none;font-size:.9rem;padding:.3rem .7rem;border-radius:6px;transition:background .2s;}
+nav a:hover,nav a.active{background:rgba(109,179,63,.25);color:var(--green);}
+
+.page{max-width:900px;margin:0 auto;padding:2rem 1rem 4rem;}
+h1{font-size:2rem;color:var(--green);text-align:center;margin-bottom:.5rem;}
+.subtitle{text-align:center;color:var(--muted);margin-bottom:2rem;}
+
+/* Category pills */
+.cats{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-bottom:2rem;}
+.cat-btn{background:var(--card);border:1px solid #2a2a4a;color:var(--muted);padding:.35rem .9rem;border-radius:20px;cursor:pointer;font-size:.82rem;transition:all .2s;}
+.cat-btn:hover,.cat-btn.active{background:rgba(109,179,63,.15);border-color:var(--green);color:var(--green);}
+
+/* Progress */
+.prog-bar-wrap{background:#2a2a4a;border-radius:4px;height:6px;margin-bottom:1.5rem;overflow:hidden;}
+.prog-bar-fill{height:100%;background:var(--green);transition:width .4s;}
+.prog-info{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-bottom:.4rem;}
+
+/* Exercise card */
+.ex-card{background:var(--card);border:1px solid #2a2a4a;border-radius:14px;padding:1.8rem;margin-bottom:1.5rem;transition:border-color .2s;}
+.ex-card.answered-ok{border-color:var(--green);}
+.ex-card.answered-ko{border-color:var(--red);}
+.ex-meta{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap;}
+.ex-num{font-size:.8rem;color:var(--muted);}
+.ex-cat{font-size:.72rem;padding:.15rem .5rem;border-radius:12px;font-weight:700;}
+.cat-upload{background:rgba(255,166,87,.12);color:#ffa657;border:1px solid rgba(255,166,87,.3);}
+.cat-security{background:rgba(231,76,60,.12);color:#e99;border:1px solid rgba(231,76,60,.3);}
+.cat-dto{background:rgba(109,179,63,.12);color:var(--green);border:1px solid rgba(109,179,63,.3);}
+.cat-entities{background:rgba(121,192,255,.12);color:#79c0ff;border:1px solid rgba(121,192,255,.3);}
+.cat-controllers{background:rgba(210,168,255,.12);color:#d2a8ff;border:1px solid rgba(210,168,255,.3);}
+.cat-services{background:rgba(63,185,80,.12);color:#3fb950;border:1px solid rgba(63,185,80,.3);}
+
+.ex-question{font-size:.95rem;font-weight:600;margin-bottom:.8rem;color:var(--text);}
+.code-block{background:var(--code-bg);border:1px solid #30363d;border-radius:8px;padding:1rem;margin-bottom:1rem;overflow-x:auto;font-family:'Consolas',monospace;font-size:.8rem;line-height:1.6;color:#c9d1d9;white-space:pre;}
+.hl-green{color:#7ee787;}.hl-blue{color:#79c0ff;}.hl-orange{color:#ffa657;}.hl-red{color:#ff7b72;}.hl-purple{color:#d2a8ff;}.hl-gray{color:#8b949e;}
+
+.opts{display:flex;flex-direction:column;gap:.55rem;}
+.opt-btn{background:#1e2845;border:1px solid #2a2a4a;border-radius:8px;padding:.7rem 1rem;cursor:pointer;font-size:.88rem;text-align:left;color:var(--text);transition:all .15s;display:flex;align-items:center;gap:.5rem;}
+.opt-btn:hover:not(.disabled){background:#253055;border-color:var(--green);}
+.opt-btn.correct{background:rgba(109,179,63,.2);border-color:var(--green);color:var(--green);}
+.opt-btn.wrong{background:rgba(231,76,60,.2);border-color:var(--red);color:var(--red);}
+.opt-btn.disabled{cursor:default;}
+.opt-label{font-weight:700;min-width:18px;}
+
+.feedback-box{margin-top:.8rem;padding:.7rem 1rem;border-radius:8px;font-size:.85rem;display:none;}
+.feedback-box.show{display:block;}
+.feedback-box.ok{background:rgba(109,179,63,.1);border:1px solid var(--green);color:var(--green);}
+.feedback-box.ko{background:rgba(231,76,60,.1);border:1px solid var(--red);color:var(--red);}
+.explanation{margin-top:.4rem;font-size:.8rem;color:var(--muted);line-height:1.5;}
+
+/* Summary */
+.summary{background:var(--card);border-radius:14px;padding:2rem;text-align:center;margin-top:2rem;}
+.summary h2{color:var(--green);margin-bottom:1rem;}
+.summary .big{font-size:3rem;font-weight:700;color:var(--green);}
+.summary .stats{display:flex;gap:2rem;justify-content:center;margin:1rem 0;flex-wrap:wrap;}
+.stat-box{text-align:center;}
+.stat-box .val{font-size:1.6rem;font-weight:700;}
+.stat-box .lbl{font-size:.75rem;color:var(--muted);}
+.reset-btn{padding:.6rem 1.5rem;background:var(--green);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.95rem;font-weight:700;margin-top:1rem;}
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="index.html">🍃 Spring Boot Repàs</a>
+  <a href="index.html">🏠 Inici</a>
+  <a href="examenes.html">📝 Exàmens</a>
+  <a href="teoria.html">📚 Teoria</a>
+  <a href="ejercicios.html" class="active">💻 Exercicis</a>
+</nav>
+
+<div class="page">
+  <h1>💻 Exercicis Pràctics de Codi</h1>
+  <p class="subtitle">Donat un fragment de codi, identifica de <strong>quina funcionalitat o patró</strong> es tracta. Especialment enfocats en les <em>ampliacions</em>.</p>
+
+  <div class="cats" id="cats">
+    <button class="cat-btn active" onclick="filterCat('all',this)">📋 Tots</button>
+    <button class="cat-btn" onclick="filterCat('upload',this)">📁 Upload</button>
+    <button class="cat-btn" onclick="filterCat('security',this)">🔒 Security</button>
+    <button class="cat-btn" onclick="filterCat('dto',this)">🧩 DTO/Builder</button>
+    <button class="cat-btn" onclick="filterCat('entities',this)">🗃️ Entitats JPA</button>
+    <button class="cat-btn" onclick="filterCat('controllers',this)">🕹️ Controladors</button>
+    <button class="cat-btn" onclick="filterCat('services',this)">⚙️ Serveis/Repos</button>
+  </div>
+
+  <div class="prog-info">
+    <span id="prog-text">0 / 0 exercicis resposts</span>
+    <span id="prog-score" style="color:var(--green)">Encerts: 0</span>
+  </div>
+  <div class="prog-bar-wrap"><div class="prog-bar-fill" id="prog-fill" style="width:0"></div></div>
+
+  <div id="exercises-container"></div>
+
+  <div class="summary" id="summary" style="display:none">
+    <h2>🎉 Exercicis completats!</h2>
+    <div class="big" id="sum-pct">0%</div>
+    <div class="stats">
+      <div class="stat-box"><div class="val" style="color:var(--green)" id="sum-ok">0</div><div class="lbl">Correctes</div></div>
+      <div class="stat-box"><div class="val" style="color:var(--red)" id="sum-ko">0</div><div class="lbl">Errades</div></div>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">🔄 Repetir</button>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   EXERCICIS DE RECONEIXEMENT DE CODI
+════════════════════════════════════════════ */
+const EXERCISES = [
+
+// ──────────────── UPLOAD ────────────────
+{
+  cat:'upload',
+  q:'Quin és el propòsit d\'aquest codi?',
+  code:`<span class="hl-green">@PostMapping</span>(<span class="hl-orange">"/upload"</span>)
+<span class="hl-blue">public</span> String <span class="hl-purple">uploadFile</span>(
+    <span class="hl-green">@RequestParam</span>(<span class="hl-orange">"file"</span>) MultipartFile file,
+    RedirectAttributes ra) {
+  Path dest = Paths.get(<span class="hl-orange">"upload-dir"</span>)
+                   .resolve(file.getOriginalFilename());
+  file.transferTo(dest);
+  ra.addFlashAttribute(<span class="hl-orange">"missatge"</span>, <span class="hl-orange">"Fitxer pujat!"</span>);
+  <span class="hl-blue">return</span> <span class="hl-orange">"redirect:/upload"</span>;
+}`,
+  opts:['Servir un fitxer com a recurs HTTP','Guardar un fitxer pujat al sistema de fitxers i redirigir','Eliminar un fitxer pujat','Llistar tots els fitxers de la carpeta'],
+  ans:1,
+  exp:'@PostMapping + MultipartFile + transferTo() = guardar el fitxer. "redirect:/upload" = redirecció MVC. És el controlador MVC de pujada.'
+},
+{
+  cat:'upload',
+  q:'Quin és el propòsit d\'aquest codi?',
+  code:`<span class="hl-green">@GetMapping</span>(<span class="hl-orange">"/uploads/{filename}"</span>)
+<span class="hl-blue">public</span> ResponseEntity&lt;Resource&gt; <span class="hl-purple">serveFile</span>(
+    <span class="hl-green">@PathVariable</span> String filename) {
+  Resource resource = <span class="hl-blue">new</span> FileSystemResource(
+      <span class="hl-orange">"upload-dir/"</span> + filename);
+  <span class="hl-blue">return</span> ResponseEntity.ok()
+    .header(HttpHeaders.CONTENT_DISPOSITION,
+            <span class="hl-orange">"inline; filename=\""</span> + filename + <span class="hl-orange">"\""</span>)
+    .body(resource);
+}`,
+  opts:['Guardar un fitxer nou','Eliminar un fitxer del servidor','Servir un fitxer existent com a recurs HTTP (REST)','Llistar fitxers en format JSON'],
+  ans:2,
+  exp:'Resource + CONTENT_DISPOSITION + ResponseEntity = retornar el fitxer com a recurs HTTP. Pertany al controlador REST de l\'upload.'
+},
+{
+  cat:'upload',
+  q:'Quin és el propòsit d\'aquest codi?',
+  code:`<span class="hl-green">@GetMapping</span>(<span class="hl-orange">"/upload"</span>)
+<span class="hl-blue">public</span> String <span class="hl-purple">showUploadForm</span>(Model model) {
+  List&lt;Path&gt; files = Files.list(Paths.get(<span class="hl-orange">"upload-dir"</span>))
+                           .collect(Collectors.toList());
+  model.addAttribute(<span class="hl-orange">"fitxers"</span>, files);
+  <span class="hl-blue">return</span> <span class="hl-orange">"upload"</span>;
+}`,
+  opts:['Pujar un fitxer al servidor','Eliminar tots els fitxers','Mostrar el formulari d\'upload i la llista de fitxers (MVC)','Servir un fitxer com a recurs'],
+  ans:2,
+  exp:'GET + Model + return "upload" (vista HTML) = controlador MVC que mostra la vista amb la llista de fitxers.'
+},
+{
+  cat:'upload',
+  q:'Quin significa aquesta configuració en application.properties?',
+  code:`<span class="hl-blue">spring.servlet.multipart.max-file-size</span>=10MB
+<span class="hl-blue">spring.servlet.multipart.max-request-size</span>=15MB`,
+  opts:['Desactiva la pujada de fitxers','Indica la mida màxima de fitxers pujats i de la petició total','Configura la carpeta on es guarden els fitxers','Defineix els tipus de fitxer permesos'],
+  ans:1,
+  exp:'Aquestes propietats limiten el tamany màxim d\'un fitxer individual (max-file-size) i de tota la petició HTTP (max-request-size).'
+},
+{
+  cat:'upload',
+  q:'Quin és el propòsit d\'aquest codi?',
+  code:`<span class="hl-green">@PostMapping</span>(<span class="hl-orange">"/upload/delete/{filename}"</span>)
+<span class="hl-blue">public</span> String <span class="hl-purple">deleteFile</span>(
+    <span class="hl-green">@PathVariable</span> String filename) {
+  Files.deleteIfExists(
+      Paths.get(<span class="hl-orange">"upload-dir"</span>).resolve(filename));
+  <span class="hl-blue">return</span> <span class="hl-orange">"redirect:/upload"</span>;
+}`,
+  opts:['Descarregar un fitxer','Canviar el nom d\'un fitxer','Eliminar un fitxer i redirigir a la vista principal','Moure un fitxer a una altra carpeta'],
+  ans:2,
+  exp:'deleteIfExists() elimina el fitxer del sistema de fitxers, i "redirect:/upload" redirigeix l\'usuari a la pàgina principal de l\'upload.'
+},
+
+// ──────────────── SECURITY ────────────────
+{
+  cat:'security',
+  q:'Quin és el propòsit d\'aquest fragment SQL?',
+  code:`<span class="hl-red">CREATE TABLE</span> users (
+  username VARCHAR(50) <span class="hl-red">NOT NULL PRIMARY KEY</span>,
+  password VARCHAR(500) <span class="hl-red">NOT NULL</span>,
+  enabled <span class="hl-blue">BOOLEAN NOT NULL</span>
+);
+<span class="hl-red">CREATE TABLE</span> authorities (
+  username VARCHAR(50) <span class="hl-red">NOT NULL</span>,
+  authority VARCHAR(50) <span class="hl-red">NOT NULL</span>,
+  <span class="hl-red">CONSTRAINT</span> fk FOREIGN KEY(username)
+    <span class="hl-red">REFERENCES</span> users(username)
+);`,
+  opts:['Crear les taules d\'un sistema de gestió de productes','Crear les taules que requereix Spring Security per a JDBC Authentication','Crear les taules per a la pujada de fitxers','Crear les taules per a l\'historial de peticions HTTP'],
+  ans:1,
+  exp:'Spring Security amb JDBC Authentication necessita exactament les taules "users" (amb username, password, enabled) i "authorities" (amb username i authority).'
+},
+{
+  cat:'security',
+  q:'Quin és el propòsit d\'aquest codi?',
+  code:`<span class="hl-green">@Bean</span>
+<span class="hl-blue">public</span> PasswordEncoder <span class="hl-purple">passwordEncoder</span>() {
+  <span class="hl-blue">return new</span> BCryptPasswordEncoder();
+}`,
+  opts:['Crear un bean per a la connexió a la base de dades','Crear un bean que encripta contrasenyes amb BCrypt per a Spring Security','Crear una sessió d\'usuari HTTP','Validar el format del correu electrònic'],
+  ans:1,
+  exp:'BCryptPasswordEncoder és l\'encriptador de contrasenyes que usa Spring Security. Cal definir-lo com a @Bean perquè Spring el pugui injectar.'
+},
+{
+  cat:'security',
+  q:'Quin seria el resultat d\'afegir aquest codi a application.properties?',
+  code:`<span class="hl-blue">spring.security.user.name</span>=admin
+<span class="hl-blue">spring.security.user.password</span>=secret123
+<span class="hl-blue">spring.security.user.roles</span>=ADMIN`,
+  opts:['Crea un usuari a la base de dades automàticament','Configura les credencials per defecte de Spring Security sense necessitat de BD','Activa el mode debug de Spring Security','Defineix la URL de login personalitzada'],
+  ans:1,
+  exp:'Aquestes propietats configuren un usuari en memòria per a Spring Security. És la manera més simple de configurar seguretat sense base de dades.'
+},
+{
+  cat:'security',
+  q:'Quin és el propòsit d\'aquesta anotació sobre la classe?',
+  code:`<span class="hl-green">@EnableWebSecurity</span>
+<span class="hl-green">@Configuration</span>
+<span class="hl-blue">public class</span> <span class="hl-purple">SecurityConfig</span> {
+
+  <span class="hl-green">@Bean</span>
+  <span class="hl-blue">public</span> SecurityFilterChain <span class="hl-purple">filterChain</span>(
+      HttpSecurity http) <span class="hl-blue">throws</span> Exception {
+    <span class="hl-gray">// configuració de seguretat...</span>
+    <span class="hl-blue">return</span> http.build();
+  }
+}`,
+  opts:['Desactivar Spring Security','Activar i personalitzar la configuració de seguretat de Spring','Configurar el servidor Tomcat','Gestionar les peticions REST'],
+  ans:1,
+  exp:'@EnableWebSecurity activa la seguretat. La classe que la conté configura com es protegeixen les rutes, com s\'autentica i quins permisos calen.'
+},
+{
+  cat:'security',
+  q:'Quin problème resol aquest codi?',
+  code:`<span class="hl-green">@Entity</span>
+<span class="hl-green">@Table</span>(name = <span class="hl-orange">"users"</span>)
+<span class="hl-blue">public class</span> <span class="hl-purple">User</span> {
+  <span class="hl-green">@Id</span>
+  <span class="hl-blue">private</span> String username;
+  <span class="hl-blue">private</span> String password;
+  <span class="hl-blue">private</span> <span class="hl-blue">boolean</span> enabled;
+
+  <span class="hl-green">@OneToMany</span>(mappedBy = <span class="hl-orange">"user"</span>, cascade = CascadeType.ALL)
+  <span class="hl-blue">private</span> List&lt;Authority&gt; authorities;
+}`,
+  opts:['Defineix l\'entitat de productes','Defineix l\'entitat d\'usuari per a Spring Security amb JDBC Authentication','Defineix una vista Thymeleaf','Configura la pujada de fitxers'],
+  ans:1,
+  exp:'Aquesta entitat mapeja la taula "users" de Spring Security. Conté username (PK), password, enabled, i la relació @OneToMany amb les authorities (rols).'
+},
+
+// ──────────────── DTO / BUILDER ────────────────
+{
+  cat:'dto',
+  q:'Quin patró de disseny implementa aquest codi?',
+  code:`<span class="hl-blue">public class</span> <span class="hl-purple">Persona</span> {
+  <span class="hl-blue">private final</span> String nom;
+  <span class="hl-blue">private final</span> String cognoms;
+  <span class="hl-blue">private final</span> Integer edat;
+  <span class="hl-blue">private final</span> String email;
+
+  <span class="hl-blue">private</span> <span class="hl-purple">Persona</span>(Builder b) {
+    <span class="hl-blue">this</span>.nom = b.nom;
+    <span class="hl-blue">this</span>.cognoms = b.cognoms;
+    <span class="hl-blue">this</span>.edat = b.edat;
+    <span class="hl-blue">this</span>.email = b.email;
+  }
+
+  <span class="hl-blue">public static class</span> <span class="hl-purple">Builder</span> {
+    <span class="hl-blue">private</span> String nom, cognoms, email;
+    <span class="hl-blue">private</span> Integer edat;
+    <span class="hl-blue">public</span> Builder <span class="hl-purple">nom</span>(String n){<span class="hl-blue">this</span>.nom=n; <span class="hl-blue">return this</span>;}
+    <span class="hl-blue">public</span> Persona  <span class="hl-purple">build</span>(){<span class="hl-blue">return new</span> Persona(<span class="hl-blue">this</span>);}
+  }
+}`,
+  opts:['Patró Singleton','Patró Factory','Patró Builder (construcció pas a pas)','Patró Observer'],
+  ans:2,
+  exp:'És el patró Builder: classe interna "Builder" amb mètodes encadenats que retornen "this", i un mètode build() que crea l\'objecte final.'
+},
+{
+  cat:'dto',
+  q:'Quin és el propòsit d\'aquesta classe?',
+  code:`<span class="hl-green">@Getter</span>
+<span class="hl-green">@Setter</span>
+<span class="hl-green">@NoArgsConstructor</span>
+<span class="hl-green">@AllArgsConstructor</span>
+<span class="hl-blue">public class</span> <span class="hl-purple">UsuariDTO</span> {
+  <span class="hl-blue">private</span> Long id;
+  <span class="hl-blue">private</span> String nom;
+  <span class="hl-blue">private</span> String email;
+  <span class="hl-gray">// sense password!</span>
+}`,
+  opts:['Una entitat JPA que mapeja la taula d\'usuaris','Un DTO que transfereix dades d\'usuari sense exposar la contrasenya','Un controlador REST d\'usuaris','Un servei de gestió d\'usuaris'],
+  ans:1,
+  exp:'És un DTO (Data Transfer Object): no té @Entity, no inclou dades sensibles (password) i serveix per transferir dades seleccionades entre capes.'
+},
+{
+  cat:'dto',
+  q:'Quin és l\'objectiu d\'aquest codi en un servei?',
+  code:`<span class="hl-blue">public</span> UsuariDTO <span class="hl-purple">toDTO</span>(Usuari usuari) {
+  <span class="hl-blue">return new</span> UsuariDTO(
+    usuari.getId(),
+    usuari.getNom(),
+    usuari.getEmail()
+    <span class="hl-gray">// password NO s'inclou</span>
+  );
+}
+
+<span class="hl-blue">public</span> List&lt;UsuariDTO&gt; <span class="hl-purple">getAllUsuaris</span>() {
+  <span class="hl-blue">return</span> usuariRepository.findAll()
+    .stream()
+    .map(<span class="hl-blue">this</span>::toDTO)
+    .collect(Collectors.toList());
+}`,
+  opts:['Guardar usuaris a la base de dades','Convertir entitats JPA a DTOs per retornar al client sense dades sensibles','Crear una taula de la base de dades','Validar les dades rebudes del client'],
+  ans:1,
+  exp:'toDTO() converteix l\'entitat Usuari a UsuariDTO excloent el camp password. getAllUsuaris usa stream+map per convertir tota la llista.'
+},
+{
+  cat:'dto',
+  q:'Quin és el propòsit d\'aquesta anotació de Lombok?',
+  code:`<span class="hl-green">@Builder</span>
+<span class="hl-green">@Data</span>
+<span class="hl-green">@Entity</span>
+<span class="hl-blue">public class</span> <span class="hl-purple">Producte</span> {
+  <span class="hl-green">@Id @GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+  <span class="hl-blue">private</span> Long id;
+  <span class="hl-blue">private</span> String nom;
+  <span class="hl-blue">private</span> Double preu;
+}
+
+<span class="hl-gray">// Ús:</span>
+Producte p = Producte.builder()
+  .nom(<span class="hl-orange">"Portàtil"</span>)
+  .preu(999.0)
+  .build();`,
+  opts:['@Builder és per fer debug del codi','@Builder genera automàticament el patró Builder (constructor pas a pas)','@Builder crea la taula a la BD','@Builder valida els camps obligatoris'],
+  ans:1,
+  exp:'@Builder de Lombok genera el patró Builder automàticament. @Data genera getters, setters, equals, hashCode i toString. Junts fan la classe molt completa amb poc codi.'
+},
+{
+  cat:'dto',
+  q:'Quin problema soluciona l\'ús del patró DTO en aquest controlador?',
+  code:`<span class="hl-gray">// ❌ SENSE DTO – exposem l'entitat directament</span>
+<span class="hl-green">@GetMapping</span>(<span class="hl-orange">"/usuaris"</span>)
+<span class="hl-blue">public</span> List&lt;Usuari&gt; <span class="hl-purple">getAll</span>() {
+  <span class="hl-blue">return</span> service.findAll(); <span class="hl-gray">// inclou password!</span>
+}
+
+<span class="hl-gray">// ✅ AMB DTO – exposem només les dades necessàries</span>
+<span class="hl-green">@GetMapping</span>(<span class="hl-orange">"/usuaris"</span>)
+<span class="hl-blue">public</span> List&lt;UsuariDTO&gt; <span class="hl-purple">getAll</span>() {
+  <span class="hl-blue">return</span> service.findAllAsDTO(); <span class="hl-gray">// sense password</span>
+}`,
+  opts:['El DTO millora el rendiment de la BD','El DTO evita exposar dades sensibles (password) i desacobla la capa de presentació de les entitats JPA','El DTO és obligatori per a Spring Security','El DTO substitueix les entitats JPA'],
+  ans:1,
+  exp:'El principal avantatge del DTO és la seguretat i el desacoblament: no s\'exposen dades internes (password, IDs interns) i la interfície és independent de la BD.'
+},
+
+// ──────────────── ENTITATS JPA ────────────────
+{
+  cat:'entities',
+  q:'Quina relació JPA representa aquest codi?',
+  code:`<span class="hl-green">@Entity</span>
+<span class="hl-blue">public class</span> <span class="hl-purple">Departament</span> {
+  <span class="hl-green">@Id @GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+  <span class="hl-blue">private</span> Long id;
+
+  <span class="hl-green">@OneToMany</span>(mappedBy = <span class="hl-orange">"departament"</span>, fetch = FetchType.LAZY)
+  <span class="hl-blue">private</span> List&lt;Empleat&gt; empleats;
+}
+
+<span class="hl-green">@Entity</span>
+<span class="hl-blue">public class</span> <span class="hl-purple">Empleat</span> {
+  <span class="hl-green">@ManyToOne</span>
+  <span class="hl-green">@JoinColumn</span>(name = <span class="hl-orange">"departament_id"</span>)
+  <span class="hl-blue">private</span> Departament departament;
+}`,
+  opts:['Un Departament té exactament un Empleat','Un Empleat pot pertànyer a molts Departaments','Un Departament té molts Empleats i un Empleat pertany a un Departament','Molts Departaments comparteixen molts Empleats'],
+  ans:2,
+  exp:'@OneToMany al Departament + @ManyToOne a l\'Empleat = un departament pot tenir molts empleats, però cada empleat pertany a un sol departament. mappedBy evita duplicar la relació.'
+},
+{
+  cat:'entities',
+  q:'Quin és el propòsit de @Transient en aquest codi?',
+  code:`<span class="hl-green">@Entity</span>
+<span class="hl-blue">public class</span> <span class="hl-purple">Producte</span> {
+  <span class="hl-green">@Id @GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+  <span class="hl-blue">private</span> Long id;
+  <span class="hl-blue">private</span> String nom;
+  <span class="hl-blue">private</span> Double preu;
+  <span class="hl-blue">private</span> Double iva;
+
+  <span class="hl-green">@Transient</span>
+  <span class="hl-blue">private</span> Double preuAmbIva; <span class="hl-gray">// calculat</span>
+}`,
+  opts:['@Transient fa que el camp sigui obligatori','@Transient indica que el camp NO es guarda a la base de dades','@Transient crea un índex a la BD','@Transient encripta el valor del camp'],
+  ans:1,
+  exp:'@Transient marca un camp com a volàtil/calculat que no ha de persistir a la BD. preuAmbIva és un valor calculat (preu * iva), no una columna.'
+},
+{
+  cat:'entities',
+  q:'Quina relació JPA representa aquest codi?',
+  code:`<span class="hl-green">@Entity</span>
+<span class="hl-blue">public class</span> <span class="hl-purple">Estudiant</span> {
+  <span class="hl-green">@ManyToMany</span>
+  <span class="hl-green">@JoinTable</span>(
+    name = <span class="hl-orange">"estudiant_assignatura"</span>,
+    joinColumns = <span class="hl-green">@JoinColumn</span>(name = <span class="hl-orange">"estudiant_id"</span>),
+    inverseJoinColumns = <span class="hl-green">@JoinColumn</span>(name = <span class="hl-orange">"assignatura_id"</span>)
+  )
+  <span class="hl-blue">private</span> List&lt;Assignatura&gt; assignatures;
+}`,
+  opts:['Un Estudiant té una Assignatura','Molts Estudiants comparteixen moltes Assignatures (Many-to-Many)','Una Assignatura té molts Estudiants','Un Estudiant pertany a una Assignatura'],
+  ans:1,
+  exp:'@ManyToMany + @JoinTable = relació molts a molts. @JoinTable defineix la taula intermèdia "estudiant_assignatura" amb les dues claus foranes.'
+},
+{
+  cat:'entities',
+  q:'Quin és el problema d\'usar EAGER en una relació de molts elements?',
+  code:`<span class="hl-green">@Entity</span>
+<span class="hl-blue">public class</span> <span class="hl-purple">Categoria</span> {
+  <span class="hl-green">@OneToMany</span>(fetch = FetchType.EAGER) <span class="hl-gray">// ⚠️</span>
+  <span class="hl-blue">private</span> List&lt;Producte&gt; productes;
+}
+
+<span class="hl-gray">// Quan fem: categoriaRepo.findAll()</span>
+<span class="hl-gray">// Spring carrega TOTES les categories</span>
+<span class="hl-gray">// AMB TOTS els productes de cadascuna</span>`,
+  opts:['No hi ha cap problema, EAGER és sempre millor','EAGER pot causar problemes de rendiment carregant moltes dades innecessàries (N+1 problem)','EAGER no és compatible amb @OneToMany','EAGER impedeix guardar dades noves'],
+  ans:1,
+  exp:'EAGER carrega les dades relacionades immediatament. Amb llistes grans, pot generar moltes queries (problema N+1) i carregar infinites dades. LAZY és millor per defecte en @OneToMany.'
+},
+
+// ──────────────── CONTROLLERS ────────────────
+{
+  cat:'controllers',
+  q:'Quin codi HTTP i cos retorna aquest endpoint?',
+  code:`<span class="hl-green">@PostMapping</span>
+<span class="hl-blue">public</span> ResponseEntity&lt;Ciutat&gt; <span class="hl-purple">crear</span>(
+    <span class="hl-green">@RequestBody</span> Ciutat ciutat) {
+  Ciutat saved = service.save(ciutat);
+  <span class="hl-blue">return</span> ResponseEntity
+    .status(HttpStatus.CREATED)
+    .body(saved);
+}`,
+  opts:['200 OK amb la llista de ciutats','204 No Content sense cos','201 Created amb la entitat creada al cos','404 Not Found si no existeix'],
+  ans:2,
+  exp:'HttpStatus.CREATED = 201. .body(saved) = retorna l\'objecte creat al cos. És l\'endpoint POST estàndard de creació de recursos.'
+},
+{
+  cat:'controllers',
+  q:'Quina és la diferència entre els dos paràmetres?',
+  code:`<span class="hl-green">@GetMapping</span>(<span class="hl-orange">"/search"</span>)
+<span class="hl-blue">public</span> List&lt;Ciutat&gt; <span class="hl-purple">search</span>(
+    <span class="hl-green">@RequestParam</span> String nom,    <span class="hl-gray">// /search?nom=Madrid</span>
+    <span class="hl-green">@PathVariable</span> Long id) {    <span class="hl-gray">// Necessita /{id} a la ruta</span>
+  <span class="hl-blue">return</span> service.search(nom, id);
+}`,
+  opts:['@RequestParam és per a POST i @PathVariable per a GET','No hi ha diferència, fan el mateix','@RequestParam captura paràmetres de la query string (?key=val), @PathVariable captura segments de la ruta (/{id})','@PathVariable s\'ha d\'enviar al cos de la petició'],
+  ans:2,
+  exp:'@RequestParam → paràmetre de consulta: /search?nom=Madrid. @PathVariable → segment de la URL: /search/5. Normalment @PathVariable necessita {id} a la ruta del mapping.'
+},
+{
+  cat:'controllers',
+  q:'Quin és el propòsit del .orElse() en aquest codi?',
+  code:`<span class="hl-green">@GetMapping</span>(<span class="hl-orange">"/{id}"</span>)
+<span class="hl-blue">public</span> ResponseEntity&lt;Producte&gt; <span class="hl-purple">getById</span>(
+    <span class="hl-green">@PathVariable</span> Long id) {
+  <span class="hl-blue">return</span> prodRepo.findById(id)
+    .map(ResponseEntity::ok)
+    .orElse(ResponseEntity.notFound().build());
+}`,
+  opts:['Crear un producte nou si no existeix','Retornar 200 OK si existeix el producte o 404 Not Found si no existeix','Llançar una excepció si el producte no existeix','Retornar tots els productes'],
+  ans:1,
+  exp:'findById retorna Optional. .map(ResponseEntity::ok) = si existeix, retorna 200. .orElse(notFound().build()) = si no existeix, retorna 404. Gestió elegant sense if/else.'
+},
+{
+  cat:'controllers',
+  q:'Quin és el propòsit d\'aquest codi de controlador MVC?',
+  code:`<span class="hl-green">@Controller</span>
+<span class="hl-green">@RequestMapping</span>(<span class="hl-orange">"/ciutats"</span>)
+<span class="hl-blue">public class</span> <span class="hl-purple">CiutatMvcController</span> {
+
+  <span class="hl-green">@GetMapping</span>
+  <span class="hl-blue">public</span> String <span class="hl-purple">llistar</span>(Model model) {
+    model.addAttribute(<span class="hl-orange">"ciutats"</span>, service.findAll());
+    <span class="hl-blue">return</span> <span class="hl-orange">"LlistatCiutats"</span>;
+  }
+}`,
+  opts:['Retornar la llista de ciutats en JSON','Mostrar un formulari HTML de creació','Carregar les ciutats i mostrar la plantilla HTML "LlistatCiutats"','Eliminar totes les ciutats'],
+  ans:2,
+  exp:'@Controller (no @Rest) + Model + return "NomPlantilla" = renderitza una vista Thymeleaf. model.addAttribute passa dades a la plantilla HTML.'
+},
+
+// ──────────────── SERVICES / REPOS ────────────────
+{
+  cat:'services',
+  q:'Quin és el propòsit de @PostConstruct en aquest servei?',
+  code:`<span class="hl-green">@Service</span>
+<span class="hl-blue">public class</span> <span class="hl-purple">CiutatService</span> {
+  <span class="hl-green">@Autowired</span>
+  <span class="hl-blue">private</span> CiutatRepository repo;
+
+  <span class="hl-green">@PostConstruct</span>
+  <span class="hl-blue">public void</span> <span class="hl-purple">init</span>() {
+    System.out.println(<span class="hl-orange">"🔢 Ciutats a la BD: "</span> + repo.count());
+  }
+}`,
+  opts:['S\'executa cada cop que es fa una petició HTTP','S\'executa una sola vegada quan Spring aixeca l\'aplicació i el bean s\'ha inicialitzat','S\'executa quan el bean es destrueix','S\'executa abans d\'injectar les dependències'],
+  ans:1,
+  exp:'@PostConstruct s\'executa UNA VEGADAodó, just desprès que Spring hagi creat el bean i injectat totes les dependències (com repo). Útil per a tasques d\'inicialització.'
+},
+{
+  cat:'services',
+  q:'Quin SQL genera automàticament aquest mètode de repositori?',
+  code:`<span class="hl-green">@Repository</span>
+<span class="hl-blue">public interface</span> <span class="hl-purple">ProducteRepository</span>
+    <span class="hl-blue">extends</span> JpaRepository&lt;Producte, Long&gt; {
+
+  List&lt;Producte&gt; <span class="hl-blue">findByPreuLessThanAndCategoriaNom</span>(
+      Double preu, String categoriaNom);
+}`,
+  opts:['SELECT * FROM producte WHERE preu > ? AND categoria_nom LIKE ?','SELECT * FROM producte WHERE preu < ? AND categoria.nom = ?','DELETE FROM producte WHERE preu < ? OR nom = ?','SELECT COUNT(*) FROM producte WHERE preu < ?'],
+  ans:1,
+  exp:'LessThan = "<". And = AND. CategoriaNom = join amb la entitat Categoria per al camp nom. Spring Data JPA analitza el nom del mètode i genera la query automàticament.'
+},
+{
+  cat:'services',
+  q:'Quin és el propòsit d\'aquest codi en un servei?',
+  code:`<span class="hl-green">@Service</span>
+<span class="hl-blue">public class</span> <span class="hl-purple">PedidoService</span> {
+
+  <span class="hl-green">@Transactional</span>
+  <span class="hl-blue">public</span> Pedido <span class="hl-purple">crearPedido</span>(PedidoDTO dto) {
+    Pedido p = <span class="hl-blue">new</span> Pedido();
+    p.setClient(clientRepo.findById(dto.getClientId())
+      .orElseThrow(() -> <span class="hl-blue">new</span> RuntimeException(<span class="hl-orange">"Client no trobat"</span>)));
+    p.setLinies(dto.getLinies().stream()
+      .map(<span class="hl-blue">this</span>::toLinea).collect(Collectors.toList()));
+    <span class="hl-blue">return</span> pedidoRepo.save(p);
+  }
+}`,
+  opts:['@Transactional vol dir que el mètode és asíncron','@Transactional garanteix que totes les operacions de BD del mètode s\'executen com una unitat atòmica (commit o rollback total)','@Transactional activa Spring Security','@Transactional li diu a Spring que el servei és de lectura'],
+  ans:1,
+  exp:'@Transactional = transacció de BD. Si qualsevol operació falla, totes fan rollback. Si totes van bé, es fa commit. Imprescindible en operacions que modifiquen múltiples taules.'
+},
+{
+  cat:'services',
+  q:'Quin és el propòsit d\'aquest codi @Query?',
+  code:`<span class="hl-green">@Query</span>(value = <span class="hl-orange">"SELECT * FROM Producte p WHERE p.preu BETWEEN :min AND :max ORDER BY p.preu ASC"</span>,
+       nativeQuery = <span class="hl-blue">true</span>)
+List&lt;Producte&gt; <span class="hl-purple">findByPreuBetween</span>(
+    <span class="hl-green">@Param</span>(<span class="hl-orange">"min"</span>) Double min,
+    <span class="hl-green">@Param</span>(<span class="hl-orange">"max"</span>) Double max);`,
+  opts:['Crea una nova taula a la BD','Executa una consulta SQL nativa per trobar productes en un rang de preu, ordenats','Elimina productes fora d\'un rang de preu','Compta productes en un rang de preu'],
+  ans:1,
+  exp:'@Query amb nativeQuery=true executa SQL natiu (no JPQL). BETWEEN filtra per rang. ORDER BY ordena. @Param lliga els paràmetres del mètode amb :min i :max de la query.'
+}
+];
+
+/* ══════════════════════════════════════════
+   STATE & RENDERING
+══════════════════════════════════════════ */
+let answered = {}; // id → {chosen, correct}
+let currentCat = 'all';
+
+function render(){
+  const container = document.getElementById('exercises-container');
+  container.innerHTML = '';
+  const visible = EXERCISES.filter((e,i)=> currentCat==='all' || e.cat===currentCat);
+
+  visible.forEach((ex, vi) => {
+    const gi = EXERCISES.indexOf(ex); // global index
+    const card = document.createElement('div');
+    card.className = 'ex-card' + (answered[gi] ? (answered[gi].correct ? ' answered-ok' : ' answered-ko') : '');
+    card.id = 'card-' + gi;
+
+    const catLabels = {
+      upload: ['cat-upload','📁 Upload'],
+      security: ['cat-security','🔒 Security'],
+      dto: ['cat-dto','🧩 DTO/Builder'],
+      entities: ['cat-entities','🗃️ Entitat JPA'],
+      controllers: ['cat-controllers','🕹️ Controlador'],
+      services: ['cat-services','⚙️ Serveis/Repos']
+    };
+    const [cls, lbl] = catLabels[ex.cat] || ['',''];
+
+    const opts = ex.opts.map((o,i)=>{
+      let cls2 = 'opt-btn';
+      if(answered[gi]){
+        cls2 += ' disabled';
+        if(i===ex.ans) cls2 += ' correct';
+        else if(i===answered[gi].chosen && i!==ex.ans) cls2 += ' wrong';
+      }
+      return `<button class="${cls2}" onclick="answer(${gi},${i})">
+        <span class="opt-label">${['A','B','C','D'][i]})</span> ${o}
+      </button>`;
+    }).join('');
+
+    const fbShow = answered[gi] ? 'show' : '';
+    const fbCls = answered[gi] ? (answered[gi].correct ? 'ok' : 'ko') : '';
+    const fbTxt = answered[gi] ? (answered[gi].correct ? '✅ Correcte!' : `❌ Incorrecte. La resposta és: ${['A','B','C','D'][ex.ans]}) ${ex.opts[ex.ans]}`) : '';
+    const exp = answered[gi] ? `<div class="explanation">💡 ${ex.exp}</div>` : '';
+
+    card.innerHTML = `
+      <div class="ex-meta">
+        <span class="ex-num">Exercici ${vi+1}</span>
+        <span class="ex-cat ${cls}">${lbl}</span>
+      </div>
+      <div class="ex-question">${ex.q}</div>
+      <div class="code-block">${ex.code}</div>
+      <div class="opts">${opts}</div>
+      <div class="feedback-box ${fbCls} ${fbShow}">${fbTxt}${exp}</div>
+    `;
+    container.appendChild(card);
+  });
+  updateProgress();
+}
+
+function answer(gi, chosen){
+  if(answered[gi]) return;
+  answered[gi] = { chosen, correct: chosen === EXERCISES[gi].ans };
+  render();
+  // scroll into view of next unanswered on mobile
+  checkComplete();
+}
+
+function updateProgress(){
+  const visible = EXERCISES.filter((e,i)=> currentCat==='all' || e.cat===currentCat);
+  const total = visible.length;
+  const done = visible.filter((e,i)=> answered[EXERCISES.indexOf(e)]).length;
+  const ok = visible.filter((e,i)=> answered[EXERCISES.indexOf(e)]?.correct).length;
+  document.getElementById('prog-text').textContent=`${done} / ${total} exercicis resposts`;
+  document.getElementById('prog-score').textContent=`Encerts: ${ok}`;
+  document.getElementById('prog-fill').style.width = total ? `${(done/total)*100}%` : '0';
+}
+
+function checkComplete(){
+  const visible = EXERCISES.filter((e,i)=> currentCat==='all' || e.cat===currentCat);
+  const total = visible.length;
+  const done = visible.filter((e,i)=> answered[EXERCISES.indexOf(e)]).length;
+  if(done === total && total > 0){
+    const ok = visible.filter((e,i)=> answered[EXERCISES.indexOf(e)]?.correct).length;
+    document.getElementById('sum-pct').textContent = Math.round(ok/total*100)+'%';
+    document.getElementById('sum-ok').textContent = ok;
+    document.getElementById('sum-ko').textContent = total - ok;
+    document.getElementById('summary').style.display='block';
+    document.getElementById('summary').scrollIntoView({behavior:'smooth'});
+  }
+}
+
+function filterCat(cat, btn){
+  currentCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('summary').style.display='none';
+  render();
+}
+
+function resetAll(){
+  answered = {};
+  document.getElementById('summary').style.display='none';
+  render();
+}
+
+// Init
+render();
+</script>
+</body>
+</html>

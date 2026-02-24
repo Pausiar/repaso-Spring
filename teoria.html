@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Teoria – Spring Boot Repàs</title>
+<style>
+:root{--green:#6db33f;--dark:#1a1a2e;--card:#16213e;--accent:#0f3460;--text:#e0e0e0;--muted:#a0a0b0;--red:#e74c3c;--code-bg:#0d1117;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;}
+nav{background:var(--accent);padding:0 2rem;display:flex;align-items:center;gap:1rem;height:56px;box-shadow:0 2px 10px rgba(0,0,0,.4);}
+nav .logo{font-size:1.2rem;font-weight:700;color:var(--green);text-decoration:none;margin-right:auto;}
+nav a{color:var(--text);text-decoration:none;font-size:.9rem;padding:.3rem .7rem;border-radius:6px;transition:background .2s;}
+nav a:hover,nav a.active{background:rgba(109,179,63,.25);color:var(--green);}
+
+.page{max-width:900px;margin:0 auto;padding:2rem 1rem 4rem;}
+h1{font-size:2rem;color:var(--green);text-align:center;margin-bottom:.5rem;}
+.subtitle{text-align:center;color:var(--muted);margin-bottom:2.5rem;}
+
+/* search */
+.search-wrap{display:flex;gap:.5rem;margin-bottom:2rem;}
+.search-wrap input{flex:1;background:var(--card);border:1px solid #2a2a4a;color:var(--text);padding:.6rem 1rem;border-radius:8px;font-size:.95rem;outline:none;transition:border-color .2s;}
+.search-wrap input:focus{border-color:var(--green);}
+
+/* accordion */
+.topic{background:var(--card);border:1px solid #2a2a4a;border-radius:12px;margin-bottom:1rem;overflow:hidden;transition:border-color .2s;}
+.topic.open{border-color:var(--green);}
+.topic-header{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;cursor:pointer;user-select:none;}
+.topic-header:hover{background:rgba(109,179,63,.05);}
+.topic-icon{font-size:1.5rem;}
+.topic-num{font-size:.75rem;background:rgba(109,179,63,.2);color:var(--green);padding:.1rem .5rem;border-radius:12px;font-weight:700;}
+.topic-title{font-size:1rem;font-weight:700;color:var(--green);flex:1;}
+.topic-arrow{font-size:1.1rem;color:var(--muted);transition:transform .3s;}
+.topic.open .topic-arrow{transform:rotate(90deg);}
+.topic-body{display:none;padding:0 1.4rem 1.4rem;}
+.topic.open .topic-body{display:block;}
+
+/* content styles */
+.topic-body h3{color:var(--green);font-size:.95rem;margin:1rem 0 .4rem;border-left:3px solid var(--green);padding-left:.6rem;}
+.topic-body h4{color:#a0c8ff;font-size:.88rem;margin:.7rem 0 .3rem;}
+.topic-body p{font-size:.88rem;line-height:1.6;color:var(--text);margin-bottom:.5rem;}
+.topic-body ul{font-size:.88rem;line-height:1.8;color:var(--text);padding-left:1.4rem;margin-bottom:.5rem;}
+.topic-body li{margin-bottom:.1rem;}
+.topic-body code{background:var(--code-bg);color:#79c0ff;padding:.1rem .35rem;border-radius:4px;font-family:'Consolas',monospace;font-size:.83rem;}
+.code-block{background:var(--code-bg);border:1px solid #2a2a4a;border-radius:8px;padding:1rem;margin:.6rem 0 1rem;overflow-x:auto;font-family:'Consolas',monospace;font-size:.82rem;line-height:1.6;color:#c9d1d9;}
+.highlight{color:var(--green);}
+.highlight2{color:#ffa657;}
+.highlight3{color:#ff7b72;}
+.hl-blue{color:#79c0ff;}
+.hl-purple{color:#d2a8ff;}
+
+/* tag pills */
+.tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom .5rem;}
+.tag{background:rgba(109,179,63,.12);color:var(--green);border:1px solid rgba(109,179,63,.3);font-size:.72rem;padding:.15rem .5rem;border-radius:12px;font-weight:600;}
+.tag.blue{background:rgba(121,192,255,.12);color:#79c0ff;border-color:rgba(121,192,255,.3);}
+.tag.orange{background:rgba(255,166,87,.12);color:#ffa657;border-color:rgba(255,166,87,.3);}
+
+.note{background:rgba(109,179,63,.08);border-left:3px solid var(--green);padding:.6rem .8rem;border-radius:0 6px 6px 0;font-size:.83rem;color:var(--muted);margin:.5rem 0;}
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="index.html">🍃 Spring Boot Repàs</a>
+  <a href="index.html">🏠 Inici</a>
+  <a href="examenes.html">📝 Exàmens</a>
+  <a href="teoria.html" class="active">📚 Teoria</a>
+  <a href="ejercicios.html">💻 Exercicis</a>
+</nav>
+
+<div class="page">
+  <h1>📚 Repàs de Teoria</h1>
+  <p class="subtitle">Resums de tots els temes del curs. Fes clic a cada tema per desplegar el contingut.</p>
+  <div class="search-wrap">
+    <input type="text" id="search-input" placeholder="🔍 Cerca un tema o paraula clau..." oninput="filterTopics()"/>
+  </div>
+  <div id="topics-container">
+
+  <!-- ══════════════════ TEMA 1 ══════════════════ -->
+  <div class="topic open" data-keywords="spring boot intro introducció framework tomcat maven maven gradle ioc servlet">
+    <div class="topic-header" onclick="toggle(this)">
+      <span class="topic-icon">🌱</span>
+      <span class="topic-num">1</span>
+      <span class="topic-title">Introducció a Spring Boot</span>
+      <span class="topic-arrow">›</span>
+    </div>
+    <div class="topic-body">
+      <div class="tags"><span class="tag">Framework</span><span class="tag blue">Java</span><span class="tag orange">Maven/Gradle</span></div>
+      <p><strong>Spring Boot</strong> és un framework Java basat en <strong>Spring Framework</strong> que simplifica el desenvolupament d'aplicacions modernes. Redueix la configuració manual i agilitza el treball.</p>
+
+      <h3>Aplicacions que es poden crear</h3>
+      <ul>
+        <li><strong>APIs REST</strong>: Comunicació entre aplicacions.</li>
+        <li><strong>Aplicacions web</strong>: Interfícies d'usuari (Thymeleaf).</li>
+        <li><strong>Microserveis</strong>: Aplicacions distribuïdes (Spring Cloud).</li>
+        <li><strong>Apps empresarials</strong>: Persistència i seguretat complexa.</li>
+      </ul>
+
+      <h3>Característiques principals</h3>
+      <ul>
+        <li>✅ <strong>Servidor integrat</strong>: Tomcat per defecte → arranca al port <code>8080</code>.</li>
+        <li>✅ <strong>Auto-configuration</strong>: Detecta i configura dependències automàticament.</li>
+        <li>✅ <strong>Dependències amb Maven/Gradle</strong>: <code>pom.xml</code> o <code>build.gradle</code>.</li>
+        <li>✅ <strong>Ecosistema complet</strong>: Security, Data, Cloud, etc.</li>
+      </ul>
+
+      <h3>Classe principal d'arrencada</h3>
+      <div class="code-block"><span class="highlight">@SpringBootApplication</span>
+<span class="highlight2">public class</span> <span class="hl-blue">MyApp</span> {
+  <span class="highlight2">public static void</span> <span class="hl-purple">main</span>(String[] args) {
+    SpringApplication.<span class="highlight3">run</span>(MyApp.class, args);
+  }
+}</div>
+
+      <h3>L'Ecosistema Spring</h3>
+      <ul>
+        <li><strong>Spring Framework</strong>: IoC, DI, AOP – el nucli.</li>
+        <li><strong>Spring Boot</strong>: Facilita la creació ràpida (servidor integrat, anotacions).</li>
+        <li><strong>Spring Data</strong>: Persistència amb JPA/Hibernate.</li>
+        <li><strong>Spring Security</strong>: Autenticació i autorització.</li>
+        <li><strong>Spring Cloud</strong>: Microserveis i aplicacions distribuïdes.</li>
+      </ul>
+      <div class="note">💡 AOP (Aspectes) = afegir crosstutting concerns (logs, transaccions) sense modificar el codi principal.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ TEMA 2 ══════════════════ -->
+  <div class="topic" data-keywords="estructura projecte spring initializr group artifact maven gradle pom resources">
+    <div class="topic-header" onclick="toggle(this)">
+      <span class="topic-icon">🏗️</span>
+      <span class="topic-num">2</span>
+      <span class="topic-title">Estructura d'un Projecte Spring Boot</span>
+      <span class="topic-arrow">›</span>
+    </div>
+    <div class="topic-body">
+      <div class="tags"><span class="tag">Spring Initializr</span><span class="tag blue">Estructura</span><span class="tag orange">pom.xml</span></div>
+
+      <h3>Spring Initializr</h3>
+      <p>Eina web per crear projectes Spring Boot: <strong>start.spring.io</strong>.</p>
+      <ul>
+        <li><strong>Project</strong>: Maven o Gradle.</li>
+        <li><strong>Language</strong>: Java, Kotlin, Groovy.</li>
+        <li><strong>Group</strong>: domini invers (ex: <code>com.empresa</code>).</li>
+        <li><strong>Artifact</strong>: nom del JAR (ex: <code>gestio-empleats</code>).</li>
+        <li><strong>Dependencies</strong>: Spring Web, Spring Data JPA, PostgreSQL Driver…</li>
+      </ul>
+
+      <h3>Estructura de carpetes</h3>
+      <div class="code-block">📂 src/main/java/com.exemple
+  ├── AplicacioSpringBoot.java   <span style="color:#6a737d">← Punt d'entrada</span>
+  ├── 📂 controller              <span style="color:#6a737d">← Capa controladors</span>
+  ├── 📂 service                 <span style="color:#6a737d">← Capa serveis</span>
+  ├── 📂 repository              <span style="color:#6a737d">← Capa repositoris</span>
+  └── 📂 model                   <span style="color:#6a737d">← Entitats JPA</span>
+
+📂 src/main/resources
+  ├── application.properties     <span style="color:#6a737d">← Configuració</span>
+  ├── schema.sql                 <span style="color:#6a737d">← Crea taules</span>
+  └── data.sql                   <span style="color:#6a737d">← Inserta dades inicials</span>
+
+📄 pom.xml                       <span style="color:#6a737d">← Dependències Maven</span></div>
+
+      <h3>application.properties clau</h3>
+      <div class="code-block"><span class="hl-blue">spring.datasource.url</span>=jdbc:h2:mem:testdb
+<span class="hl-blue">spring.datasource.driver-class-name</span>=org.h2.Driver
+<span class="hl-blue">spring.jpa.hibernate.ddl-auto</span>=create-drop
+<span class="hl-blue">server.port</span>=8080</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ TEMA 3 ══════════════════ -->
+  <div class="topic" data-keywords="mvc model view controller thymeleaf arquitectura capes responsabilitats">
+    <div class="topic-header" onclick="toggle(this)">
+      <span class="topic-icon">🔄</span>
+      <span class="topic-num">3</span>
+      <span class="topic-title">Arquitectura MVC</span>
+      <span class="topic-arrow">›</span>
+    </div>
+    <div class="topic-body">
+      <div class="tags"><span class="tag">MVC</span><span class="tag blue">Thymeleaf</span><span class="tag orange">Arquitectura</span></div>
+
+      <h3>Components del patró MVC</h3>
+      <ul>
+        <li>🗃️ <strong>Model</strong>: Dades + lògica de negoci. Entitats, serveis.</li>
+        <li>🖼️ <strong>Vista</strong>: Interfície d'usuari. Plantilles Thymeleaf (<code>.html</code>).</li>
+        <li>🕹️ <strong>Controlador</strong>: Gestiona peticions HTTP. Intermediari entre Model i Vista.</li>
+      </ul>
+
+      <h3>Objectius del MVC</h3>
+      <ul>
+        <li>✅ <strong>Separació de responsabilitats</strong>: Cada component té un paper clar.</li>
+        <li>✅ <strong>Reutilització</strong>: El Model és reutilitzable.</li>
+        <li>✅ <strong>Escalabilitat i manteniment</strong>.</li>
+      </ul>
+
+      <h3>Arquitectura en capes de Spring Boot</h3>
+      <div class="code-block">  HTTP Request
+       ↓
+  [ Controller ]  ← @RestController / @Controller
+       ↓
+  [ Service    ]  ← @Service  (lògica de negoci)
+       ↓
+  [ Repository ]  ← @Repository (accés a BD)
+       ↓
+  [ Database   ]</div>
+
+      <h3>Flux d'una petició</h3>
+      <p>1. Client fa <code>GET /ciutats</code> → 2. Controlador rep la petició → 3. Crida al Servei → 4. Servei crida el Repositori → 5. Repositori retorna dades → 6. Controlador retorna JSON o renderitza Vista.</p>
+
+      <div class="note">💡 @Controller retorna vistes HTML (Thymeleaf). @RestController retorna JSON/XML.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ TEMA 4 ══════════════════ -->
+  <div class="topic" data-keywords="ioc di injecció dependències beans contenidor autowired component service repository">
+    <div class="topic-header" onclick="toggle(this)">
+      <span class="topic-icon">🔌</span>
+      <span class="topic-num">4</span>
+      <span class="topic-title">IoC i Injecció de Dependències (DI)</span>
+      <span class="topic-arrow">›</span>
+    </div>
+    <div class="topic-body">
+      <div class="tags"><span class="tag">IoC</span><span class="tag blue">DI</span><span class="tag orange">Beans</span></div>
+
+      <h3>Inversió de Control (IoC)</h3>
+      <p>El <strong>contenidor IoC de Spring</strong> crea i gestiona els objectes (<strong>beans</strong>). No som nosaltres qui els creem amb <code>new</code>.</p>
+
+      <h3>Cicle del contenidor IoC</h3>
+      <ol style="font-size:.88rem;line-height:2;padding-left:1.4rem;">
+        <li>Inici amb <code>SpringApplication.run()</code></li>
+        <li>Escaneja classes amb <code>@Component</code>, <code>@Service</code>, <code>@Repository</code>, <code>@Controller</code></li>
+        <li>Crea una instància (bean) per cada una</li>
+        <li>Injecta les dependències (<code>@Autowired</code>)</li>
+        <li>Gestiona el cicle de vida del bean</li>
+      </ol>
+
+      <h3>Anotacions principals</h3>
+      <ul>
+        <li><code>@Component</code> → Component genèric.</li>
+        <li><code>@Service</code> → Capa de lògica de negoci.</li>
+        <li><code>@Repository</code> → Capa d'accés a dades.</li>
+        <li><code>@Controller</code> / <code>@RestController</code> → Capa de presentació.</li>
+        <li><code>@Autowired</code> → Injecta una dependència automàticament.</li>
+        <li><code>@PostConstruct</code> → S'executa <strong>DESPRÉS</strong> d'inicialitzar el bean.</li>
+        <li><code>@PreDestroy</code> → S'executa <strong>ABANS</strong> de destruir el bean.</li>
+      </ul>
+
+      <h3>Exemple: Sense IoC vs Amb IoC</h3>
+      <div class="code-block"><span style="color:#6a737d">// ❌ SENSE IoC – acoblament fort</span>
+<span class="highlight2">public class</span> <span class="hl-blue">Servei</span> {
+  <span class="highlight2">private</span> Repositori repositori = <span class="highlight3">new</span> Repositori(); <span style="color:#6a737d">// manual!</span>
+}
+
+<span style="color:#6a737d">// ✅ AMB IoC – Spring injecta automàticament</span>
+<span class="highlight">@Service</span>
+<span class="highlight2">public class</span> <span class="hl-blue">Servei</span> {
+  <span class="highlight">@Autowired</span>
+  <span class="highlight2">private</span> Repositori repositori; <span style="color:#6a737d">// Spring ho gestiona</span>
+}</div>
+
+      <div class="note">💡 Avantatges IoC: menys coupling, fàcil de testar (mocks), codi més mantenible.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ TEMA 5 ══════════════════ -->
+  <div class="topic" data-keywords="jpa entitats entity table column id generatedvalue onetoone onetomany manytomany hibernate">
+    <div class="topic-header" onclick="toggle(this)">
+      <span class="topic-icon">🗃️</span>
+      <span class="topic-num">5</span>
+      <span class="topic-title">Entitats JPA</span>
+      <span class="topic-arrow">›</span>
+    </div>
+    <div class="topic-body">
+      <div class="tags"><span class="tag">JPA</span><span class="tag blue">Hibernate</span><span class="tag orange">@Entity</span></div>
+
+      <h3>Anotacions bàsiques d'entitat</h3>
+      <ul>
+        <li><code>@Entity</code> → Marca la classe com a taula de BD.</li>
+        <li><code>@Table(name="nom")</code> → Especifica el nom de la taula.</li>
+        <li><code>@Id</code> → Clau primària.</li>
+        <li><code>@GeneratedValue(strategy = GenerationType.IDENTITY)</code> → Autoincrement.</li>
+        <li><code>@Column(name="nom", nullable=false, length=100, unique=true)</code> → Configuració de columna.</li>
+        <li><code>@Transient</code> → Camp que NO es guarda a la BD.</li>
+      </ul>
+
+      <h3>Exemple d'entitat</h3>
+      <div class="code-block"><span class="highlight">@Entity</span>
+<span class="highlight">@Table</span>(name = <span class="highlight2">"usuaris"</span>)
+<span class="highlight2">public class</span> <span class="hl-blue">Usuari</span> {
+  <span class="highlight">@Id</span>
+  <span class="highlight">@GeneratedValue</span>(strategy = GenerationType.<span class="highlight3">IDENTITY</span>)
+  <span class="highlight2">private</span> Long id;
+
+  <span class="highlight">@Column</span>(nullable = <span class="highlight3">false</span>, length = 100)
+  <span class="highlight2">private</span> String nom;
+
+  <span class="highlight">@Column</span>(unique = <span class="highlight3">true</span>)
+  <span class="highlight2">private</span> String email;
+
+  <span class="highlight">@Transient</span>
+  <span class="highlight2">private</span> String dadesTemporals; <span style="color:#6a737d">// NO es guarda</span>
+}</div>
+
+      <h3>Relacions entre entitats</h3>
+      <ul>
+        <li><code>@OneToOne</code> → 1 persona – 1 passaport.</li>
+        <li><code>@OneToMany</code> / <code>@ManyToOne</code> → 1 autor – molts llibres.</li>
+        <li><code>@ManyToMany</code> → Molts estudiants – moltes assignatures → demana <code>@JoinTable</code>.</li>
+        <li><code>@JoinColumn(name="fk_col")</code> → Defineix la clau forana.</li>
+        <li><code>mappedBy</code> → Evita duplicar la relació al costat invers.</li>
+        <li><code>fetch = FetchType.LAZY</code> → Carrega dades el·lazily (sota demanda).</li>
+        <li><code>fetch = FetchType.EAGER</code> → Carrega dades immediatament.</li>
+      </ul>
+      <div class="note">💡 JPA no és una implementació, és una especificació. Hibernate l'implementa per defecte a Spring Boot.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ TEMA 6 ══════════════════ -->
+  <div class="topic" data-keywords="repositoris jparepository crudrepository findby save delete query convenció noms">
+    <div class="topic-header" onclick="toggle(this)">
+      <span class="topic-icon">📦</span>
+      <span class="topic-num">6</span>
+      <span class="topic-title">Repositoris</span>
+      <span class="topic-arrow">›</span>
+    </div>
+    <div class="topic-body">
+      <div class="tags"><span class="tag">JpaRepository</span><span class="tag blue">CRUD</span><span class="tag orange">@Query</span></div>
+
+      <h3>Creació d'un repositori</h3>
+      <div class="code-block"><span class="highlight">@Repository</span>
+<span class="highlight2">public interface</span> <span class="hl-blue">CiutatRepository</span>
+    <span class="highlight2">extends</span> <span class="highlight3">JpaRepository</span>&lt;Ciutat, Long&gt; {
+  <span style="color:#6a737d">// JpaRepository&lt;ENTITAT, TIPUS_CLAU&gt;</span>
+  <span style="color:#6a737d">// Primer paràmetre = tipus entitat</span>
+  <span style="color:#6a737d">// Segon paràmetre = tipus clau primària</span>
+}</div>
+
+      <h3>Mètodes CRUD predefinits</h3>
+      <ul>
+        <li><code>save(entity)</code> → Guardar/actualitzar.</li>
+        <li><code>findById(id)</code> → Retorna <code>Optional&lt;T&gt;</code>.</li>
+        <li><code>findAll()</code> → Retorna <code>List&lt;T&gt;</code>.</li>
+        <li><code>deleteById(id)</code> → Elimina per id.</li>
+        <li><code>existsById(id)</code> → Comprova si existeix.</li>
+        <li><code>count()</code> → Nombre total d'entitats.</li>
+        <li><code>flush()</code> → Commit forçat a la BD.</li>
+      </ul>
+
+      <h3>Convenció de noms</h3>
+      <ul>
+        <li><code>findByNom(String nom)</code> → WHERE nom = ?</li>
+        <li><code>findByPoblacioGreaterThan(int x)</code> → WHERE poblacio &gt; ?</li>
+        <li><code>findByNomContaining(String s)</code> → WHERE nom LIKE %s%</li>
+        <li><code>findByNomAndPais(String n, String p)</code> → AND</li>
+        <li><code>countByPais(String p)</code> → COUNT WHERE pais = ?</li>
+        <li><code>deleteByNom(String n)</code> → DELETE WHERE nom = ?</li>
+        <li><code>existsByEmail(String e)</code> → EXISTS WHERE email = ?</li>
+      </ul>
+
+      <h3>Consulta personalitzada amb @Query</h3>
+      <div class="code-block"><span class="highlight">@Query</span>(<span class="highlight2">"SELECT c FROM Ciutat c WHERE c.pais = :pais"</span>)
+List&lt;Ciutat&gt; <span class="hl-purple">findCiutatsByPais</span>(<span class="highlight">@Param</span>(<span class="highlight2">"pais"</span>) String pais);
+
+<span style="color:#6a737d">// SQL natiu:</span>
+<span class="highlight">@Query</span>(value=<span class="highlight2">"SELECT * FROM ciutat WHERE pais=?"</span>, nativeQuery=<span class="highlight3">true</span>)
+List&lt;Ciutat&gt; <span class="hl-purple">findByPaisNatiu</span>(String pais);</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ TEMA 7 ══════════════════ -->
+  <div class="topic" data-keywords="serveis service lògica negoci autowired postconstruct predestroy">
+    <div class="topic-header" onclick="toggle(this)">
+      <span class="topic-icon">⚙️</span>
+      <span class="topic-num">7</span>
+      <span class="topic-title">Serveis</span>
+      <span class="topic-arrow">›</span>
+    </div>
+    <div class="topic-body">
+      <div class="tags"><span class="tag">@Service</span><span class="tag blue">Lògica negoci</span><span class="tag orange">@Autowired</span></div>
+
+      <h3>Que és un servei?</h3>
+      <p>Classe que encapsula la <strong>lògica de negoci</strong>. Intermediari entre <em>Controller</em> i <em>Repository</em>.</p>
+
+      <h3>Anotacions dels serveis</h3>
+      <ul>
+        <li><code>@Service</code> → Registra la classe com a bean de negoci.</li>
+        <li><code>@Autowired</code> → Injecta repositoris o altres serveis.</li>
+        <li><code>@PostConstruct</code> → Mètode que s'executa després d'inicialitzar.</li>
+        <li><code>@PreDestroy</code> → Mètode que s'executa abans de destruir el bean.</li>
+        <li><code>@Transactional</code> → Gestiona transaccions de BD.</li>
+      </ul>
+
+      <h3>Exemple de servei complet</h3>
+      <div class="code-block"><span class="highlight">@Service</span>
+<span class="highlight2">public class</span> <span class="hl-blue">PaisService</span> {
+
+  <span class="highlight2">private final</span> PaisRepository <span class="hl-blue">paisRepository</span>;
+
+  <span class="highlight">@Autowired</span>
+  <span class="highlight2">public</span> <span class="hl-purple">PaisService</span>(PaisRepository r) {
+    <span class="highlight3">this</span>.paisRepository = r;
+  }
+
+  <span class="highlight2">public</span> List&lt;Pais&gt; <span class="hl-purple">obtenirTots</span>() {
+    <span class="highlight2">return</span> paisRepository.<span class="highlight3">findAll</span>();
+  }
+
+  <span class="highlight">@PostConstruct</span>
+  <span class="highlight2">public void</span> <span class="hl-purple">init</span>() {
+    System.out.<span class="highlight3">println</span>(<span class="highlight2">"Inicialitzat amb "</span> + paisRepository.<span class="highlight3">count</span>() + <span class="highlight2">" països"</span>);
+  }
+
+  <span class="highlight">@PreDestroy</span>
+  <span class="highlight2">public void</span> <span class="hl-purple">cleanup</span>() {
+    paisRepository.<span class="highlight3">flush</span>();
+  }
+}</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ TEMA 8 ══════════════════ -->
+  <div class="topic" data-keywords="controladors controller restcontroller getmapping postmapping requestparam pathvariable requestbody responseentity http">
+    <div class="topic-header" onclick="toggle(this)">
+      <span class="topic-icon">🕹️</span>
+      <span class="topic-num">8</span>
+      <span class="topic-title">Controladors</span>
+      <span class="topic-arrow">›</span>
+    </div>
+    <div class="topic-body">
+      <div class="tags"><span class="tag">@RestController</span><span class="tag blue">HTTP</span><span class="tag orange">ResponseEntity</span></div>
+
+      <h3>Tipus de controladors</h3>
+      <ul>
+        <li><code>@Controller</code> → Retorna vistes HTML (Thymeleaf). Afegeix dades amb <code>Model</code>.</li>
+        <li><code>@RestController</code> → Retorna <strong>JSON/XML</strong>. Combina @Controller + @ResponseBody.</li>
+      </ul>
+
+      <h3>Anotacions de rutes</h3>
+      <ul>
+        <li><code>@RequestMapping("/ruta")</code> → Ruta base de la classe.</li>
+        <li><code>@GetMapping("/ruta")</code> → Petició GET.</li>
+        <li><code>@PostMapping("/ruta")</code> → Petició POST.</li>
+        <li><code>@PutMapping("/ruta")</code> → Petició PUT (actualitzar).</li>
+        <li><code>@DeleteMapping("/ruta")</code> → Petició DELETE.</li>
+      </ul>
+
+      <h3>Captura de paràmetres</h3>
+      <ul>
+        <li><code>@RequestParam String nom</code> → URL: <code>/ciutats?nom=Madrid</code></li>
+        <li><code>@PathVariable Long id</code> → URL: <code>/ciutats/5</code></li>
+        <li><code>@RequestBody Entitat obj</code> → Cos de la petició (JSON → objecte).</li>
+      </ul>
+
+      <h3>Exemple de controlador REST</h3>
+      <div class="code-block"><span class="highlight">@RestController</span>
+<span class="highlight">@RequestMapping</span>(<span class="highlight2">"/api/ciutat"</span>)
+<span class="highlight2">public class</span> <span class="hl-blue">CiutatController</span> {
+
+  <span class="highlight">@Autowired</span>
+  <span class="highlight2">private</span> CiutatService service;
+
+  <span class="highlight">@GetMapping</span>
+  <span class="highlight2">public</span> List&lt;Ciutat&gt; <span class="hl-purple">getAll</span>() {
+    <span class="highlight2">return</span> service.<span class="highlight3">findAll</span>();
+  }
+
+  <span class="highlight">@GetMapping</span>(<span class="highlight2">"/{id}"</span>)
+  <span class="highlight2">public</span> ResponseEntity&lt;Ciutat&gt; <span class="hl-purple">getById</span>(<span class="highlight">@PathVariable</span> Long id) {
+    <span class="highlight2">return</span> service.<span class="highlight3">findById</span>(id)
+      .map(ResponseEntity::<span class="highlight3">ok</span>)
+      .orElse(ResponseEntity.<span class="highlight3">notFound</span>().build());
+  }
+
+  <span class="highlight">@PostMapping</span>
+  <span class="highlight2">public</span> ResponseEntity&lt;Ciutat&gt; <span class="hl-purple">create</span>(<span class="highlight">@RequestBody</span> Ciutat c) {
+    <span class="highlight2">return</span> ResponseEntity.<span class="highlight3">status</span>(201).body(service.<span class="highlight3">save</span>(c));
+  }
+
+  <span class="highlight">@DeleteMapping</span>(<span class="highlight2">"/{id}"</span>)
+  <span class="highlight2">public</span> ResponseEntity&lt;Void&gt; <span class="hl-purple">delete</span>(<span class="highlight">@PathVariable</span> Long id) {
+    service.<span class="highlight3">deleteById</span>(id);
+    <span class="highlight2">return</span> ResponseEntity.<span class="highlight3">noContent</span>().build();
+  }
+}</div>
+
+      <h3>Codis HTTP importants</h3>
+      <ul>
+        <li><code>200 OK</code> → Petició correcta.</li>
+        <li><code>201 Created</code> → Recurs creat.</li>
+        <li><code>204 No Content</code> → OK sense cos de resposta.</li>
+        <li><code>400 Bad Request</code> → Dades incorrectes.</li>
+        <li><code>404 Not Found</code> → Recurs no trobat.</li>
+        <li><code>500 Internal Server Error</code> → Error del servidor.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══════════════════ TEMA 9 ══════════════════ -->
+  <div class="topic" data-keywords="dto data transfer object builder patró lombok builder director concrete">
+    <div class="topic-header" onclick="toggle(this)">
+      <span class="topic-icon">🧱</span>
+      <span class="topic-num">9</span>
+      <span class="topic-title">Patrons Builder i DTO</span>
+      <span class="topic-arrow">›</span>
+    </div>
+    <div class="topic-body">
+      <div class="tags"><span class="tag">Builder</span><span class="tag blue">DTO</span><span class="tag orange">Lombok</span></div>
+
+      <h3>Patró Builder</h3>
+      <p>Permet construir objectes complexos <strong>pas a pas</strong>. Útil quan hi ha molts atributs opcionals.</p>
+      <h4>Els 4 components</h4>
+      <ul>
+        <li>🔧 <strong>Builder (interfície)</strong>: Defineix els mètodes de construcció.</li>
+        <li>🔨 <strong>Concrete Builder</strong>: Implementa la interfície i construeix l'objecte.</li>
+        <li>🎬 <strong>Director</strong>: Coordina l'ordre de construcció.</li>
+        <li>📦 <strong>Product</strong>: L'objecte final construït.</li>
+      </ul>
+      <div class="code-block"><span style="color:#6a737d">// Amb Lombok: @Builder fa tot automàticament</span>
+<span class="highlight">@Builder</span>
+<span class="highlight">@Data</span>
+<span class="highlight2">public class</span> <span class="hl-blue">Persona</span> {
+  <span class="highlight2">private</span> String nom;
+  <span class="highlight2">private</span> String cognoms;
+  <span class="highlight2">private int</span> edat;
+  <span class="highlight2">private</span> String email; <span style="color:#6a737d">// opcional</span>
+}
+
+<span style="color:#6a737d">// Ús:</span>
+Persona p = Persona.<span class="highlight3">builder</span>()
+  .nom(<span class="highlight2">"Jaume"</span>)
+  .cognoms(<span class="highlight2">"García"</span>)
+  .edat(25)
+  .build();</div>
+
+      <h3>Patró DTO (Data Transfer Object)</h3>
+      <p>Objecte que <strong>transfereix dades entre capes</strong> sense exposar l'entitat JPA interna.</p>
+      <h4>Avantatges del DTO</h4>
+      <ul>
+        <li>✅ Evita exposar dades sensibles (contrasenyes, IDs interns).</li>
+        <li>✅ Desacobla la capa de presentació de la BD.</li>
+        <li>✅ Permet personalitzar el format de les respostes.</li>
+      </ul>
+      <div class="code-block"><span style="color:#6a737d">// Entitat JPA (no s'exposa directament)</span>
+<span class="highlight">@Entity</span>
+<span class="highlight2">public class</span> <span class="hl-blue">Usuari</span> { Long id; String nom; String password; }
+
+<span style="color:#6a737d">// DTO (el que retorna el controlador)</span>
+<span class="highlight2">public class</span> <span class="hl-blue">UsuariDTO</span> { String nom; <span style="color:#6a737d">// sense password!</span> }
+
+<span style="color:#6a737d">// Conversió Entitat → DTO</span>
+UsuariDTO dto = <span class="highlight3">new</span> UsuariDTO(usuari.getNom());</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ TEMA 10 ══════════════════ -->
+  <div class="topic" data-keywords="spring security autenticació autorització csrf users authorities bcrypt jdbc">
+    <div class="topic-header" onclick="toggle(this)">
+      <span class="topic-icon">🔒</span>
+      <span class="topic-num">10</span>
+      <span class="topic-title">Spring Security</span>
+      <span class="topic-arrow">›</span>
+    </div>
+    <div class="topic-body">
+      <div class="tags"><span class="tag">Security</span><span class="tag blue">BCrypt</span><span class="tag orange">JDBC Auth</span></div>
+
+      <h3>Que és Spring Security?</h3>
+      <p>Mòdul de Spring que gestiona <strong>autenticació</strong> (qui ets) i <strong>autorització</strong> (què pots fer). Protegeix contra CSRF, injeccions, etc.</p>
+
+      <h3>Dependència</h3>
+      <div class="code-block"><span style="color:#6a737d">// build.gradle:</span>
+implementation <span class="highlight2">'org.springframework.boot:spring-boot-starter-security'</span>
+implementation <span class="highlight2">'org.springframework.boot:spring-boot-starter-validation'</span></div>
+
+      <h3>Configuració bàsica (application.properties)</h3>
+      <div class="code-block"><span class="hl-blue">spring.security.user.name</span>=jaume
+<span class="hl-blue">spring.security.user.password</span>=1234
+<span class="hl-blue">spring.security.user.roles</span>=USER</div>
+
+      <h3>JDBC Authentication – Taules requerides</h3>
+      <div class="code-block"><span class="highlight3">CREATE TABLE</span> users (
+  username VARCHAR(50) <span class="highlight3">NOT NULL PRIMARY KEY</span>,
+  password VARCHAR(500) <span class="highlight3">NOT NULL</span>,
+  enabled BOOLEAN <span class="highlight3">NOT NULL</span>
+);
+<span class="highlight3">CREATE TABLE</span> authorities (
+  username VARCHAR(50) <span class="highlight3">NOT NULL</span>,
+  authority VARCHAR(50) <span class="highlight3">NOT NULL</span>,
+  <span class="highlight3">CONSTRAINT</span> fk FOREIGN KEY(username) REFERENCES users(username)
+);</div>
+
+      <h3>Conceptes clau</h3>
+      <ul>
+        <li><code>@EnableWebSecurity</code> → Activa la configuració de seguretat.</li>
+        <li><code>BCryptPasswordEncoder</code> → Encriptació segura de contrasenyes.</li>
+        <li><strong>users</strong> → Taula d'usuaris (username, password, enabled).</li>
+        <li><strong>authorities</strong> → Taula de rols (ROLE_USER, ROLE_ADMIN…).</li>
+        <li><strong>CSRF</strong>: Cross-Site Request Forgery → protegit per defecte.</li>
+      </ul>
+
+      <div class="note">💡 La contrasenya generada automàticament apareix a la consola: <br><code>Using generated security password: abc123...</code></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ TEMA 11 ══════════════════ -->
+  <div class="topic" data-keywords="excepcions exceptionhandler controlleradvice restcontrolleradvice responseentity http error global local">
+    <div class="topic-header" onclick="toggle(this)">
+      <span class="topic-icon">⚠️</span>
+      <span class="topic-num">11</span>
+      <span class="topic-title">Gestió d'Excepcions</span>
+      <span class="topic-arrow">›</span>
+    </div>
+    <div class="topic-body">
+      <div class="tags"><span class="tag">@ExceptionHandler</span><span class="tag blue">@RestControllerAdvice</span><span class="tag orange">HTTP Status</span></div>
+
+      <h3>Tipus de gestió</h3>
+      <ul>
+        <li>🏠 <strong>Local</strong>: Dins d'un controlador específic (<code>@ExceptionHandler</code>).</li>
+        <li>🌐 <strong>Global</strong>: Per a tots els controladors (<code>@ControllerAdvice</code> / <code>@RestControllerAdvice</code>).</li>
+      </ul>
+
+      <h3>Gestió local en REST</h3>
+      <div class="code-block"><span class="highlight">@RestController</span>
+<span class="highlight2">public class</span> <span class="hl-blue">CiutatController</span> {
+  
+  <span class="highlight">@ExceptionHandler</span>(ResourceNotFoundException.class)
+  <span class="highlight2">public</span> ResponseEntity&lt;Map&lt;String,String&gt;&gt; <span class="hl-purple">handleNotFound</span>(
+      ResourceNotFoundException ex) {
+    Map&lt;String,String&gt; err = <span class="highlight3">new</span> HashMap&lt;&gt;();
+    err.put(<span class="highlight2">"error"</span>, <span class="highlight2">"No trobat"</span>);
+    err.put(<span class="highlight2">"message"</span>, ex.getMessage());
+    <span class="highlight2">return</span> ResponseEntity.<span class="highlight3">status</span>(HttpStatus.NOT_FOUND).body(err);
+  }
+}</div>
+
+      <h3>Gestió global en REST</h3>
+      <div class="code-block"><span class="highlight">@RestControllerAdvice</span>
+<span class="highlight2">public class</span> <span class="hl-blue">GlobalExceptionHandler</span> {
+
+  <span class="highlight">@ExceptionHandler</span>(Exception.class)
+  <span class="highlight">@ResponseStatus</span>(HttpStatus.INTERNAL_SERVER_ERROR)
+  <span class="highlight2">public</span> Map&lt;String,String&gt; <span class="hl-purple">handleAll</span>(Exception ex) {
+    Map&lt;String,String&gt; err = <span class="highlight3">new</span> HashMap&lt;&gt;();
+    err.put(<span class="highlight2">"error"</span>, <span class="highlight2">"Error intern"</span>);
+    err.put(<span class="highlight2">"message"</span>, ex.getMessage());
+    <span class="highlight2">return</span> err;
+  }
+}</div>
+
+      <h3>Gestió global en MVC (Thymeleaf)</h3>
+      <div class="code-block"><span class="highlight">@ControllerAdvice</span>
+<span class="highlight2">public class</span> <span class="hl-blue">WebExceptionHandler</span> {
+
+  <span class="highlight">@ExceptionHandler</span>(Exception.class)
+  <span class="highlight2">public</span> String <span class="hl-purple">handleError</span>(Exception ex, Model model) {
+    model.addAttribute(<span class="highlight2">"textError"</span>, ex.getMessage());
+    <span class="highlight2">return</span> <span class="highlight2">"plantillaError"</span>; <span style="color:#6a737d">// plantilla .html</span>
+  }
+}</div>
+
+      <h3>Diferència clau</h3>
+      <ul>
+        <li><code>@ControllerAdvice</code> → Per a controladors MVC (retorna vistes).</li>
+        <li><code>@RestControllerAdvice</code> → Per a REST controllers (retorna JSON).</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══════════════════ TEMA 12 ══════════════════ -->
+  <div class="topic" data-keywords="upload fitxers multipartfile carpeta resource serving mvc rest">
+    <div class="topic-header" onclick="toggle(this)">
+      <span class="topic-icon">📁</span>
+      <span class="topic-num">12</span>
+      <span class="topic-title">Ampliació: Upload de Fitxers</span>
+      <span class="topic-arrow">›</span>
+    </div>
+    <div class="topic-body">
+      <div class="tags"><span class="tag orange">Ampliació</span><span class="tag blue">MultipartFile</span><span class="tag">Resource</span></div>
+
+      <h3>Configuració (application.properties)</h3>
+      <div class="code-block"><span class="hl-blue">spring.servlet.multipart.max-file-size</span>=10MB
+<span class="hl-blue">spring.servlet.multipart.max-request-size</span>=10MB</div>
+
+      <h3>Endpoints</h3>
+      <ul>
+        <li><code>GET /upload</code> → Mostra el formulari i llista de fitxers (MVC).</li>
+        <li><code>POST /upload</code> → Puja un fitxer i guarda a <code>upload-dir/</code> (MVC).</li>
+        <li><code>GET /uploads/{filename}</code> → Retorna el fitxer com a recurs HTTP (REST).</li>
+        <li><code>POST /upload/delete/{filename}</code> → Elimina el fitxer (MVC).</li>
+      </ul>
+
+      <h3>Per que dos controladors?</h3>
+      <ul>
+        <li>🖼️ <strong>Controlador MVC</strong>: Gestiona la vista HTML, el formulari, la redirecció.</li>
+        <li>📡 <strong>Controlador REST</strong>: Retorna el fitxer com a <code>Resource</code>, controla el <code>Content-Type</code>.</li>
+      </ul>
+
+      <div class="code-block"><span style="color:#6a737d">// Controlador MVC – puja fitxer</span>
+<span class="highlight">@PostMapping</span>(<span class="highlight2">"/upload"</span>)
+<span class="highlight2">public</span> String <span class="hl-purple">pujarFitxer</span>(<span class="highlight">@RequestParam</span>(<span class="highlight2">"file"</span>) MultipartFile file) {
+  Path dest = Paths.get(<span class="highlight2">"upload-dir"</span>).resolve(file.getOriginalFilename());
+  file.<span class="highlight3">transferTo</span>(dest);
+  <span class="highlight2">return</span> <span class="highlight2">"redirect:/upload"</span>;
+}
+
+<span style="color:#6a737d">// Controlador REST – serveix el fitxer</span>
+<span class="highlight">@GetMapping</span>(<span class="highlight2">"/uploads/{filename}"</span>)
+<span class="highlight2">public</span> ResponseEntity&lt;Resource&gt; <span class="hl-purple">servirFitxer</span>(<span class="highlight">@PathVariable</span> String filename) {
+  Resource r = <span class="highlight3">new</span> FileSystemResource(<span class="highlight2">"upload-dir/"</span> + filename);
+  <span class="highlight2">return</span> ResponseEntity.<span class="highlight3">ok</span>()
+    .header(HttpHeaders.CONTENT_DISPOSITION, <span class="highlight2">"inline; filename=\""</span>+filename+<span class="highlight2">"\""</span>)
+    .body(r);
+}</div>
+      <div class="note">💡 Els fitxers es guarden físicament a la carpeta <code>upload-dir/</code> del sistema de fitxers, NO a la base de dades.</div>
+    </div>
+  </div>
+
+  </div><!-- /topics-container -->
+</div>
+
+<script>
+function toggle(header){
+  const topic = header.parentElement;
+  topic.classList.toggle('open');
+}
+function filterTopics(){
+  const q = document.getElementById('search-input').value.toLowerCase();
+  document.querySelectorAll('.topic').forEach(t=>{
+    const txt = (t.dataset.keywords + ' ' + t.textContent).toLowerCase();
+    t.style.display = txt.includes(q) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
